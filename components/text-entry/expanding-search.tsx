@@ -305,7 +305,7 @@ export function ExpandingSearch({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
                 transition={pop}
-                className="inline-grid h-5 min-w-5 shrink-0 place-items-center rounded-[8px] bg-muted px-1 font-sans text-[12px] font-medium leading-4 text-fg-muted"
+                className="inline-grid h-5 min-w-5 shrink-0 place-items-center rounded-[8px] bg-surface shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_10%,transparent)] px-1 font-sans text-[12px] font-medium leading-4 text-fg-muted"
               >
                 {shortcut}
               </motion.kbd>

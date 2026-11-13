@@ -58,7 +58,7 @@ function Favicon({ source, size, className }: { source: CitationSource; size: nu
 function SourceRow({ source, link }: { source: CitationSource; link: boolean }) {
   return (
     <>
-      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-subtle">
+      <span className="grid size-8 shrink-0 place-items-center rounded-[10px] bg-surface shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_10%,transparent)]">
         {/* A full-disc favicon fills the 20 px circle; the hairline keeps a white or black disc readable on the tile. */}
         <Favicon source={source} size={20} className="ring-1 ring-fg/10 [&_svg]:size-full" />
       </span>

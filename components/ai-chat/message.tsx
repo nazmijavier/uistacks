@@ -172,7 +172,8 @@ export function Message({
               animate: { opacity: 1, y: 0 },
               transition: { delay: revealDelay + 0.06 * i },
             };
-            const look = "inline-flex h-8 items-center gap-2 rounded-full bg-surface px-3 text-sm text-fg shadow-[inset_0_0_0_1px_var(--border)]";
+            // Outline only, no fill (owner, Nov 14): a soft grey stroke that sits on any surface.
+            const look = "inline-flex h-8 items-center gap-2 rounded-full bg-transparent px-3 text-sm text-fg shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_14%,transparent)]";
             const inner = (
               <>
                 <span className="text-fg-muted">{i + 1}</span>
@@ -196,7 +197,7 @@ export function Message({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: revealDelay + 0.06 * shown.length }}
-              className="inline-flex h-8 items-center rounded-full bg-surface px-3 text-sm tabular-nums text-fg-muted shadow-[inset_0_0_0_1px_var(--border)]"
+              className="inline-flex h-8 items-center rounded-full bg-transparent px-3 text-sm tabular-nums text-fg-muted shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_14%,transparent)]"
             >
               +{extra}
               <span className="sr-only"> more sources</span>

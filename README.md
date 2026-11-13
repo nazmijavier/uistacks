@@ -2,7 +2,7 @@
 
 **UI Stacks components for AI agents.** Animated React components for AI chat and agents, dashboards and charts, checkout and forms. Built with React, TypeScript, Tailwind CSS and Motion, with Light and Dark themes, keyboard support and screen reader labels.
 
-This repository holds the 65 free components, MIT licensed. Every component has a live preview, props, accessibility notes and a prompt for your coding agent at **[uistacks.dev](https://uistacks.dev)**.
+This repository holds the 71 free components, MIT licensed. Every component has a live preview, props, accessibility notes and a prompt for your coding agent at **[uistacks.dev](https://uistacks.dev)**.
 
 ## Quick start
 
@@ -31,6 +31,7 @@ Prefer an agent? Open the component on uistacks.dev, copy its prompt, and hand i
 - [Citation](https://uistacks.dev/components/citation) · `components/ai-chat/citation.tsx`
 - [Suggestions](https://uistacks.dev/components/suggestions) · `components/ai-chat/suggestions.tsx`
 - [Feedback](https://uistacks.dev/components/feedback) · `components/ai-chat/feedback.tsx`
+- [Starter cards](https://uistacks.dev/components/starter-cards) · `components/ai-chat/starter-cards.tsx`
 - [Citation row](https://uistacks.dev/components/citation-row) · `components/ai-chat/citation-row.tsx`
 - [Branch switcher](https://uistacks.dev/components/branch-switcher) · `components/ai-chat/branch-switcher.tsx`
 
@@ -44,6 +45,7 @@ Prefer an agent? Open the component on uistacks.dev, copy its prompt, and hand i
 - [Icon button](https://uistacks.dev/components/icon-button) · `components/actions/icon-button.tsx`
 - [Split button](https://uistacks.dev/components/split-button) · `components/actions/split-button.tsx`
 - [Bell button](https://uistacks.dev/components/bell-button) · `components/actions/bell-button.tsx`
+- [Copy button](https://uistacks.dev/components/copy-button) · `components/actions/copy-button.tsx`
 
 ### Text entry
 
@@ -121,6 +123,10 @@ Prefer an agent? Open the component on uistacks.dev, copy its prompt, and hand i
 
 - [Announcement pill](https://uistacks.dev/components/announcement-pill) · `components/marketing/announcement-pill.tsx`
 - [Copy-prompt box](https://uistacks.dev/components/copy-prompt-box) · `components/marketing/copy-prompt-box.tsx`
+- [Newsletter signup](https://uistacks.dev/components/newsletter-signup) · `components/marketing/newsletter-signup.tsx`
+- [Changelog entry](https://uistacks.dev/components/changelog-entry) · `components/marketing/changelog-entry.tsx`
+- [Metric strip](https://uistacks.dev/components/metric-strip) · `components/marketing/metric-strip.tsx`
+- [CTA banner](https://uistacks.dev/components/cta-banner) · `components/marketing/cta-banner.tsx`
 
 ### Effects
 

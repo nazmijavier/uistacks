@@ -251,7 +251,7 @@ export function Citation({ index, label, title, meta, quote, href, icon, default
             {/* aria-hidden: the chip already reads this text through aria-describedby. */}
             <span aria-hidden className="block">
               <span className="flex items-center gap-3">
-                <span className="grid size-6 shrink-0 place-items-center rounded-[7px] bg-subtle text-fg [&>svg]:size-4">{icon ?? <DefaultMark />}</span>
+                <span className="grid size-6 shrink-0 place-items-center rounded-[7px] bg-surface shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_10%,transparent)] text-fg [&>svg]:size-4">{icon ?? <DefaultMark />}</span>
                 <span className="min-w-0">
                   {title && <span className="block truncate text-[15px] font-medium leading-[22px] text-fg">{title}</span>}
                   {meta && <span className="block truncate text-[13px] leading-5 text-fg-muted">{meta}</span>}

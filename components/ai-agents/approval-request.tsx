@@ -88,7 +88,7 @@ export function ApprovalRequest({
       className={`@container w-full max-w-[460px] rounded-[20px] bg-surface p-5 shadow-[var(--shadow-card)] ${className}`}
     >
       <div className="flex items-start gap-3">
-        <div className={`grid size-10 shrink-0 place-items-center rounded-[14px] ${high ? "bg-danger-soft text-danger" : "bg-muted text-fg"}`}>
+        <div className={`grid size-10 shrink-0 place-items-center rounded-[14px] ${high ? "bg-danger-soft text-danger" : "bg-surface shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_10%,transparent)] text-fg"}`}>
           {icon ?? <Landmark size={20} strokeWidth={1.5} />}
         </div>
         <div className="min-w-0 flex-1 pt-0.5">

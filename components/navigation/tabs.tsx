@@ -195,7 +195,7 @@ export function Tabs({ items, value, defaultValue, onValueChange, variant = "und
                 <motion.span
                   layoutId={`${id}-indicator`}
                   transition={move}
-                  className="absolute inset-0 rounded-full bg-surface shadow-[var(--shadow-btn-secondary)] dark:bg-raised"
+                  className="absolute inset-0 rounded-full bg-surface shadow-[var(--shadow-btn-secondary)] dark:bg-[color-mix(in_srgb,var(--fg)_16%,var(--surface))]"
                 />
               )}
               <span className={`relative flex items-center ${s.gap}`}>{inside}</span>
