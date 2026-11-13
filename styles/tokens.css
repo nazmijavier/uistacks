@@ -1,0 +1,103 @@
+/* UI Stacks tokens. Paste into globals.css after @import "tailwindcss"; Dark applies under a .dark parent. */
+
+@theme inline {
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-subtle: var(--subtle);
+  --color-muted: var(--muted);
+  --color-track: var(--track);
+  --color-track-strong: var(--track-strong);
+  --color-border: var(--border);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-text: var(--warning-text);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-text: var(--danger-text);
+  --color-select: var(--select);
+  --color-select-soft: var(--select-soft);
+  --color-select-text: var(--select-text);
+  --color-inverse: var(--inverse);
+  --color-inverse-fg: var(--inverse-fg);
+}
+
+:root {
+  --fg: #18181b;
+  --fg-muted: #535358;
+  --fg-subtle: #67676c;
+  --surface: #ffffff;
+  --raised: #ffffff;
+  --subtle: #f4f4f5;
+  --muted: #eaeaec;
+  --track: #e4e4e7;
+  --track-strong: #d4d4d8;
+  --border: #e4e4e7;
+  --success: #12a150;
+  --success-soft: #12a1501a;
+  --success-text: #0d7a3d;
+  --warning: #c27803;
+  --warning-soft: #c278031a;
+  --warning-text: #946200;
+  --danger: #e5484d;
+  --danger-soft: #e5484d1a;
+  --danger-text: #c42f35;
+  --select: #1e6af1;
+  --select-soft: #eef5ff;
+  --select-text: #1a52d2;
+  --inverse: #2b2b30;
+  --inverse-fg: #ffffff;
+  --bg: #ffffff;
+  --border-soft: #00000014;
+  --edge: #0000000f;
+  --shadow-card: 0 0 0 1px rgb(0 0 0 / 0.115), 0 1px 2px rgb(0 0 0 / 0.05), 0 4px 12px rgb(0 0 0 / 0.05), 0 12px 24px rgb(0 0 0 / 0.05);
+  --shadow-control: 0 0 0 1px var(--border);
+  --shadow-overlay: 0 0 0 1px var(--edge), 0 1px 1px rgb(0 0 0 / 0.06), 0 3px 3px rgb(0 0 0 / 0.06), 0 6px 6px rgb(0 0 0 / 0.06), 0 12px 12px rgb(0 0 0 / 0.06), 0 24px 24px rgb(0 0 0 / 0.04), 0 16px 48px rgb(0 0 0 / 0.12);
+  --shadow-hairline: 0 0 0 1px var(--edge);
+  --shadow-btn-secondary: 0 0 0 1px rgb(0 0 0 / 0.08), 0 1px 2px rgb(0 0 0 / 0.06), 0 2px 4px rgb(0 0 0 / 0.04), inset 0 1px 0 #ffffff;
+  --shadow-btn-primary: 0 0 0 1px #18181b, 0 1px 2px rgb(0 0 0 / 0.2), 0 3px 6px rgb(0 0 0 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.14);
+  --grad-primary: linear-gradient(180deg, #45454b 0%, #2b2b30 100%);
+  --series-1: #1e6af1;
+}
+
+.dark {
+  --fg: #ededed;
+  --fg-muted: #aaaaaf;
+  --fg-subtle: #929292;
+  --surface: #292929;
+  --raised: #333333;
+  --subtle: #1f1f1f;
+  --muted: #333333;
+  --track: #3b3b3b;
+  --track-strong: #484848;
+  --border: #3a3a3a;
+  --success: #a0efc0;
+  --success-soft: #a0efc024;
+  --success-text: #a0efc0;
+  --warning: #f0b232;
+  --warning-soft: #ffd24224;
+  --warning-text: #f5c35c;
+  --danger: #f06464;
+  --danger-soft: #f0646429;
+  --danger-text: #f06464;
+  --select: #216ef4;
+  --select-soft: #152646;
+  --select-text: #82adfd;
+  --inverse: #e9e9ec;
+  --inverse-fg: #0a0a0a;
+  --bg: #1a1a1a;
+  --border-soft: #ffffff14;
+  --edge: #ffffff14;
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.15);
+  --shadow-control: 0 0 0 1px var(--border);
+  --shadow-overlay: 0 0 0 1px var(--edge), 0 2px 4px rgb(0 0 0 / 0.3), 0 12px 24px rgb(0 0 0 / 0.4), 0 24px 48px rgb(0 0 0 / 0.3);
+  --shadow-btn-secondary: 0 0 0 1px rgb(255 255 255 / 0.08), 0 1px 2px rgb(0 0 0 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --shadow-btn-primary: 0 0 0 1px #ffffff, 0 1px 2px rgb(0 0 0 / 0.4), inset 0 -1px 0 rgb(0 0 0 / 0.08);
+  --grad-primary: linear-gradient(180deg, #ffffff 0%, #e9e9ec 100%);
+  --series-1: #4c8dff;
+}
