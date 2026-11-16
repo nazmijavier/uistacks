@@ -19,8 +19,8 @@ UI Stacks is a library of animated React 19.2+ components for Tailwind CSS v4 an
 
 ## Installing
 
-- Free: `npx shadcn@latest add @uistacks/<name>`.
-- Pro components, blocks and templates: `npx shadcn@latest add @uistacks-pro/<name>`. This needs the
+- Free: `npx shadcn add @uistacks/<name>`.
+- Pro components, blocks and templates: `npx shadcn add @uistacks-pro/<name>`. This needs the
   `@uistacks-pro` registry in components.json and the license key in the `UISTACKS_LICENSE_KEY` environment variable
   (set up once, see https://uistacks.dev/docs/agents). If a Pro install answers 401, tell the user to set the key; never
   ask them to paste the key into the chat, never print it, never write it into a committed file.

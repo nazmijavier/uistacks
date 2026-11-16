@@ -21,10 +21,10 @@ Prefer an agent? Open the component on uistacks.dev, copy its prompt, and hand i
 ## Install with the shadcn CLI
 
 ```bash
-npx shadcn@latest add https://uistacks.dev/r/approval-request.json
+npx shadcn add https://uistacks.dev/r/approval-request
 ```
 
-Or add the registry once to `components.json` (`"registries": { "@uistacks": "https://uistacks.dev/r/{name}.json" }`) and run `npx shadcn@latest add @uistacks/<name>`. The same registry works with the shadcn MCP server, so your agent can search and install by name. Setup for agents, including Pro: [uistacks.dev/docs/agents](https://uistacks.dev/docs/agents).
+Or add the registry once to `components.json` (`"registries": { "@uistacks": "https://uistacks.dev/r/{name}.json" }`) and run `npx shadcn add @uistacks/<name>`. The same registry works with the shadcn MCP server, so your agent can search and install by name. Setup for agents, including Pro: [uistacks.dev/docs/agents](https://uistacks.dev/docs/agents).
 
 ## Agent skill (Claude Code)
 
