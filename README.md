@@ -29,7 +29,7 @@ Or add the registry once to `components.json` (`"registries": { "@uistacks": "ht
 ## Agent skill (Claude Code)
 
 ```bash
-npx skills add nazmijavier/uistacks --skill uistacks
+npx skills add https://uistacks.dev
 ```
 
 The skill in [`skills/uistacks`](skills/uistacks/SKILL.md) tells your agent to search UI Stacks before writing UI, how to install, and which tokens keep new screens consistent.
