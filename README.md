@@ -18,9 +18,25 @@ This repository holds the 71 free components, MIT licensed. Every component has 
 
 Prefer an agent? Open the component on uistacks.dev, copy its prompt, and hand it to Claude Code, Cursor or Copilot.
 
+## Install with the shadcn CLI
+
+```bash
+npx shadcn@latest add https://uistacks.dev/r/approval-request.json
+```
+
+Or add the registry once to `components.json` (`"registries": { "@uistacks": "https://uistacks.dev/r/{name}.json" }`) and run `npx shadcn@latest add @uistacks/<name>`. The same registry works with the shadcn MCP server, so your agent can search and install by name. Setup for agents, including Pro: [uistacks.dev/docs/agents](https://uistacks.dev/docs/agents).
+
+## Agent skill (Claude Code)
+
+```bash
+npx skills add nazmijavier/uistacks --skill uistacks
+```
+
+The skill in [`skills/uistacks`](skills/uistacks/SKILL.md) tells your agent to search UI Stacks before writing UI, how to install, and which tokens keep new screens consistent.
+
 ## Requirements
 
-- React 19 and Tailwind CSS 4
+- React 19.2 or later and Tailwind CSS 4
 - `motion` and `lucide-react`
 
 ## Components
