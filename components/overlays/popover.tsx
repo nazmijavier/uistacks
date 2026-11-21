@@ -78,7 +78,7 @@ const GAP = 10; // trigger to panel, arrow included
 const EDGE = 8; // kept free at the viewport edge
 const spring = { type: "spring", stiffness: 520, damping: 34 } as const;
 const focusRing = "outline-none focus-visible:ring-2 focus-visible:ring-[var(--select)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]";
-/** Panels rendered in the body, each with the wrapper of the trigger that owns it. */
+/** Every open panel, with the wrapper of the trigger that owns it. */
 const owners = new WeakMap<Element, RefObject<HTMLDivElement | null>>();
 const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -209,9 +209,12 @@ export function Popover({
     if (e.key !== "Escape" || e.defaultPrevented) return;
     const focused = document.activeElement;
     const inside = holds(focused);
-    // Focus in a popover nested in this one: the key is the inner one's.
-    const own = focused?.closest("[data-popover-panel]");
-    if (inside && own && own !== panel.current) return;
+    // Focus on the trigger or in the panel of a popover nested in this one: the key is the inner one's.
+    const nested = Array.from(document.querySelectorAll("[data-popover-panel]")).some((q) => {
+      const w = owners.get(q)?.current;
+      return q !== panel.current && !!w && w !== wrap.current && holds(w) && (w.contains(focused) || q.contains(focused));
+    });
+    if (nested) return;
     if (!inside && !engaged) return;
     e.preventDefault();
     close(inside);
