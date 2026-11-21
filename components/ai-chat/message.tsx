@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, ChevronRight, Copy, Ellipsis, RotateCw, ThumbsDown, ThumbsUp } from "lucide-react";
 
-/** A filled thumb keeps the cut between the cuff and the hand (owner, Nov 13): two shapes with a gap, not one blob. */
+/** A filled thumb keeps the cut between the cuff and the hand: two shapes with a gap, not one blob. */
 function FilledThumb({ size, down = false }: { size: number; down?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" aria-hidden style={down ? { transform: "rotate(180deg)" } : undefined}>
@@ -89,7 +89,7 @@ export function Message({
   if (role === "user") {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={reduce ? false : { opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 420, damping: 34 }}
         className={`flex items-start justify-end gap-2.5 ${className}`}
@@ -110,7 +110,7 @@ export function Message({
     <div className={`flex flex-col ${className}`}>
       <div className="flex items-center gap-2.5">
         {avatar ?? (
-          // The default assistant mark (owner, Nov 13): the UI Stacks mark on a small ink tile, mono in Light and Dark.
+          // The default assistant mark: the UI Stacks mark on a small ink tile, mono in Light and Dark.
           <span aria-hidden className="grid size-6 place-items-center rounded-[7px] bg-fg text-bg">
             <svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d="M4.38 14.14 14.38 19.14 17.24 17.71v1.91L12.47 22 2.95 17.24v-2.38l1.43-.72ZM6.28 8.9l10 5 2.86-1.43v1.91l-4.76 2.38L4.85 12V9.62l1.43-.72ZM11.52 2l9.52 4.76v2.38l-4.76 2.38-9.52-4.76V4.38L11.52 2Z" />
@@ -123,7 +123,7 @@ export function Message({
 
       {thought && (
         <div className="mt-3">
-          {/* A calm label and a chevron that turns as the reasoning folds open (owner, Nov 13: no status check).
+          {/* A calm label and a chevron that turns as the reasoning folds open (no status check).
               Only a thought with text to show is a toggle; a bare label is plain text. */}
           {thought.text ? (
             <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className={`-mx-1 flex items-center gap-0.5 rounded-md px-1 text-[15px] text-fg-muted transition-colors hover:text-fg ${ring}`}>
@@ -172,11 +172,11 @@ export function Message({
         <div className="mt-3 flex flex-wrap gap-2">
           {shown.map((s, i) => {
             const chip = {
-              initial: { opacity: 0, y: 6 },
+              initial: reduce ? false : { opacity: 0, y: 6 },
               animate: { opacity: 1, y: 0 },
               transition: { delay: revealDelay + 0.06 * i },
             };
-            // Outline only, no fill (owner, Nov 14): a soft grey stroke that sits on any surface.
+            // Outline only, no fill: a soft grey stroke that sits on any surface.
             const look = "inline-flex h-8 items-center gap-2 rounded-full bg-transparent px-3 text-sm text-fg shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_14%,transparent)]";
             const inner = (
               <>
@@ -187,18 +187,18 @@ export function Message({
             );
             // No href: a plain chip, never a dead "#" link. Only links react to hover.
             return s.href ? (
-              <motion.a key={s.label} href={s.href} {...chip} className={`${look} transition-colors hover:bg-subtle ${ring}`}>
+              <motion.a key={i} href={s.href} {...chip} className={`${look} transition-colors hover:bg-subtle ${ring}`}>
                 {inner}
               </motion.a>
             ) : (
-              <motion.span key={s.label} {...chip} className={look}>
+              <motion.span key={i} {...chip} className={look}>
                 {inner}
               </motion.span>
             );
           })}
           {extra > 0 && (
             <motion.span
-              initial={{ opacity: 0, y: 6 }}
+              initial={reduce ? false : { opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: revealDelay + 0.06 * shown.length }}
               className="inline-flex h-8 items-center rounded-full bg-transparent px-3 text-sm tabular-nums text-fg-muted shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_14%,transparent)]"

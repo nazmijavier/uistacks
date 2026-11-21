@@ -119,7 +119,7 @@ export function Suggestions({ items, variant = "chips", onSelect, className = ""
           {...enter(i, reduce)}
           whileHover={reduce ? undefined : { y: -2 }}
           whileTap={reduce ? undefined : { scale: 0.97 }}
-          // Outline chips, no fill (owner, Nov 14), the same soft stroke as the Message source badges.
+          // Outline chips, no fill, the same soft stroke as the Message source badges.
           className={`inline-flex h-8 items-center gap-1.5 rounded-full bg-transparent pl-2.5 pr-3 text-sm leading-5 text-fg shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_14%,transparent)] transition-colors hover:bg-[color-mix(in_srgb,var(--fg)_4%,transparent)] ${ring}`}
         >
           {it.icon ?? <AiSparkle size={16} />}
