@@ -78,6 +78,8 @@ const GAP = 10; // trigger to panel, arrow included
 const EDGE = 8; // kept free at the viewport edge
 const spring = { type: "spring", stiffness: 520, damping: 34 } as const;
 const focusRing = "outline-none focus-visible:ring-2 focus-visible:ring-[var(--select)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]";
+/** Panels rendered in the body, each with the wrapper of the trigger that owns it. */
+const owners = new WeakMap<Element, RefObject<HTMLDivElement | null>>();
 const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /** The kit's rounded tip in the panel colour, with the panel's 1 px edge on its two sides. */
@@ -134,7 +136,15 @@ export function Popover({
 
   const triggerEl = () => wrap.current?.firstElementChild as HTMLElement | null;
   /** In the trigger or the panel, wherever the panel is rendered. */
-  const holds = (node: Node | null) => !!node && (!!wrap.current?.contains(node) || !!panel.current?.contains(node));
+  const holds = (node: Node | null) => {
+    // A popover nested in this panel may have its own panel in the body: follow it back to its trigger.
+    for (let n = node; n; ) {
+      if (wrap.current?.contains(n) || panel.current?.contains(n)) return true;
+      const host = (n instanceof Element ? n : n.parentElement)?.closest("[data-popover-portal]");
+      n = (host && owners.get(host)?.current) ?? null;
+    }
+    return false;
+  };
 
   const setOpen = useCallback(
     (next: boolean) => {
@@ -187,6 +197,7 @@ export function Popover({
   const panelRef = useCallback(
     (node: HTMLDivElement | null) => {
       panel.current = node;
+      if (node) owners.set(node, wrap);
       if (node) place();
     },
     [place]
@@ -265,7 +276,7 @@ export function Popover({
     const t = triggerEl();
     if (e.key !== "Tab" || e.defaultPrevented || !open || !c || !t) return;
     const target = e.target as HTMLElement;
-    const items = Array.from(c.querySelectorAll<HTMLElement>(FOCUSABLE));
+    const items = Array.from(c.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((el) => el.getClientRects().length > 0);
     if (t.contains(target)) {
       if (e.shiftKey) return;
       e.preventDefault();
@@ -273,11 +284,21 @@ export function Popover({
     } else if (c.contains(target)) {
       const edge = e.shiftKey ? target === c || target === items[0] : target === (items[items.length - 1] ?? c);
       if (!edge) return;
-      // Forward: the browser's own Tab then moves on from the trigger, and the blur closes the panel.
+      // Forward: the browser's own Tab moves on from the trigger. The closing panel is made inert so that Tab
+      // can't land back in it when the trigger is the last stop on the page.
       if (e.shiftKey) e.preventDefault();
+      else {
+        c.inert = true;
+        close(false);
+      }
       t.focus({ preventScroll: true });
     }
   };
+
+  // Reopened before the exit finished: the same panel is reused, so it has to take focus again.
+  useEffect(() => {
+    if (open && panel.current) panel.current.inert = false;
+  }, [open]);
 
   // Clicks on the trigger bubble here, after its own onClick (which can preventDefault to keep it shut).
   const toggle = (e: MouseEvent<HTMLDivElement>) => {
@@ -309,6 +330,7 @@ export function Popover({
           <motion.div
             ref={panelRef}
             id={id}
+            data-popover-portal={portal ? "" : undefined}
             role="dialog"
             aria-labelledby={title ? `${id}-title` : undefined}
             aria-describedby={description ? `${id}-desc` : undefined}
