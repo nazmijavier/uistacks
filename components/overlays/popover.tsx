@@ -284,21 +284,17 @@ export function Popover({
     } else if (c.contains(target)) {
       const edge = e.shiftKey ? target === c || target === items[0] : target === (items[items.length - 1] ?? c);
       if (!edge) return;
-      // Forward: the browser's own Tab moves on from the trigger. The closing panel is made inert so that Tab
+      // Forward: the browser's own Tab moves on from the trigger. The panel is inert for that one step, so Tab
       // can't land back in it when the trigger is the last stop on the page.
       if (e.shiftKey) e.preventDefault();
       else {
         c.inert = true;
+        setTimeout(() => (c.inert = false));
         close(false);
       }
       t.focus({ preventScroll: true });
     }
   };
-
-  // Reopened before the exit finished: the same panel is reused, so it has to take focus again.
-  useEffect(() => {
-    if (open && panel.current) panel.current.inert = false;
-  }, [open]);
 
   // Clicks on the trigger bubble here, after its own onClick (which can preventDefault to keep it shut).
   const toggle = (e: MouseEvent<HTMLDivElement>) => {
