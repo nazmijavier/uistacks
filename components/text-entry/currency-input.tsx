@@ -243,7 +243,11 @@ export function CurrencyInput({
     const keep = raw.slice(0, at).replace(other, "").length;
     let pos = 0;
     for (let seen = 0; pos < next.length && seen < keep; pos++) if (counted.test(next[pos])) seen++;
-    caret.current = pos;
+    if (next === shown && input.current) {
+      // Only a separator was removed: nothing re-renders, so put the text and the caret back by hand.
+      input.current.value = next;
+      input.current.setSelectionRange(pos, pos);
+    } else caret.current = pos;
     commit(next);
   };
 
