@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, ChevronRight, Copy, Ellipsis, RotateCw, ThumbsDown, ThumbsUp } from "lucide-react";
 
@@ -38,7 +38,7 @@ export interface MessageProps {
   maxSources?: number;
   /** Show copy, retry, thumbs and more under the answer. */
   actions?: boolean;
-  /** "Try again" under the answer. Without it, Try again plays the answer in again. */
+  /** "Try again" under the answer. */
   onRetry?: () => void;
   /** The ••• button under the answer, e.g. to open a menu. */
   onMore?: () => void;
@@ -76,11 +76,15 @@ export function Message({
   className = "",
 }: MessageProps) {
   const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(0); // counts copies; 0 hides the check
   const [vote, setVote] = useState<"up" | "down" | null>(null);
-  // Built-in Try again (no onRetry): each take streams the answer in again.
-  const [take, setTake] = useState(0);
   const reduce = useReducedMotion();
+  // Each copy restarts the wait, so a second click never loses its check early.
+  useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(0), 1400);
+    return () => clearTimeout(t);
+  }, [copied]);
 
   if (role === "user") {
     return (
@@ -145,8 +149,8 @@ export function Message({
         </div>
       )}
 
-      <motion.p key={take} initial={take ? { opacity: 0 } : false} animate={{ opacity: 1 }} className="mt-3 text-pretty text-base leading-[26px] text-fg">
-        {streaming || take > 0
+      <motion.p initial={false} animate={{ opacity: 1 }} className="mt-3 text-pretty text-base leading-[26px] text-fg">
+        {streaming
           ? words.map((w, i) =>
               /^\s+$/.test(w) ? (
                 w
@@ -215,16 +219,13 @@ export function Message({
             onClick={() => {
               navigator.clipboard
                 ?.writeText(content)
-                .then(() => {
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1400);
-                })
+                .then(() => setCopied((n) => n + 1))
                 .catch(() => {});
             }}
           >
             {copied ? <Check size={20} strokeWidth={1.75} /> : <Copy size={20} strokeWidth={1.5} />}
           </button>
-          <button type="button" aria-label="Try again" onClick={onRetry ?? (() => setTake((t) => t + 1))} className={iconBtn}>
+          <button type="button" aria-label="Try again" onClick={onRetry} className={iconBtn}>
             <RotateCw size={20} strokeWidth={1.5} />
           </button>
           {(["up", "down"] as const).map((v) => (
@@ -236,7 +237,7 @@ export function Message({
             <Ellipsis size={20} strokeWidth={1.5} />
           </button>
           <span className="sr-only" role="status" aria-live="polite">
-            {copied ? "Copied" : take > 0 && !onRetry ? "Answer regenerated" : ""}
+            {copied ? "Copied" : ""}
           </span>
         </motion.div>
       )}

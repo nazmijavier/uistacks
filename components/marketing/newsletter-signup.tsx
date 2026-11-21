@@ -12,9 +12,8 @@ export interface NewsletterSignupProps {
   placeholder?: string;
   buttonLabel?: string;
   /** Called with the address after it passes the format check. Return a promise: while it runs the button shows a
-   *  sending state; a rejection shows its message (or `errorMessage`) as the error line. Without it the form waits
-   *  a moment and succeeds, which is handy for previews. */
-  onSubscribe?: (email: string) => Promise<unknown> | void;
+   *  sending state; a rejection shows its message (or `errorMessage`) as the error line. */
+  onSubscribe: (email: string) => Promise<unknown> | void;
   /** A small note under the field, e.g. how often you write. `false` hides it. */
   privacy?: ReactNode | false;
   /** The heading of the success state. Default "Check your inbox". */
@@ -98,7 +97,7 @@ export function NewsletterSignup({
     setError("");
     setStatus("sending");
     try {
-      await (onSubscribe ? onSubscribe(value) : new Promise((r) => setTimeout(r, 1100)));
+      await onSubscribe(value);
       setEmail(value);
       setStatus("done");
     } catch (err) {

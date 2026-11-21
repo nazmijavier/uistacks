@@ -106,6 +106,7 @@
   --edge: #ffffff14;
   --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.15);
   --shadow-control: 0 0 0 1px var(--border);
+  --shadow-hairline: 0 0 0 1px var(--edge);
   --shadow-overlay: 0 0 0 1px var(--edge), 0 2px 4px rgb(0 0 0 / 0.3), 0 12px 24px rgb(0 0 0 / 0.4), 0 24px 48px rgb(0 0 0 / 0.3);
   --shadow-btn-secondary: 0 0 0 1px rgb(255 255 255 / 0.08), 0 1px 2px rgb(0 0 0 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.06);
   --shadow-btn-primary: 0 0 0 1px #ffffff, 0 1px 2px rgb(0 0 0 / 0.4), inset 0 -1px 0 rgb(0 0 0 / 0.08);
