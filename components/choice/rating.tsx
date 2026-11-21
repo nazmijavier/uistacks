@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
+import { useId, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Star } from "lucide-react";
 
@@ -39,6 +39,8 @@ export interface RatingProps {
   count?: number;
   /** Noun after the count (reviews). */
   countLabel?: string;
+  /** BCP 47 locale for the numbers, e.g. "id-ID" for 1.250. Default "en-US". */
+  locale?: string;
   /** A word per whole star, e.g. ["Poor", "Fair", "Good", "Great", "Excellent"]; shown beside the stars. */
   labels?: string[];
   /** Posts the value with a form. */
@@ -55,9 +57,7 @@ const SIZE: Record<RatingSize, { px: number; gap: number; text: string }> = {
   md: { px: 20, gap: 4, text: "text-[14px] leading-5" },
   lg: { px: 24, gap: 4, text: "text-[16px] leading-6" },
 };
-const nf = new Intl.NumberFormat("en-US");
 const PAD = 4; // the slider row's padding, which keeps the focus ring off the stars
-const one = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 const clampTo = (v: number, max: number, step: number) => Math.min(max, Math.max(0, Math.round(v / step) * step));
 
@@ -101,6 +101,7 @@ export function Rating({
   showValue,
   count,
   countLabel = "reviews",
+  locale = "en-US",
   labels,
   name,
   "aria-label": ariaLabel,
@@ -109,6 +110,8 @@ export function Rating({
 }: RatingProps) {
   const uid = useId();
   const reduce = useReduce();
+  const nf = useMemo(() => new Intl.NumberFormat(locale), [locale]);
+  const one = useMemo(() => new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }), [locale]);
   const [inner, setInner] = useState(defaultValue);
   const value = Math.min(max, Math.max(0, valueProp ?? inner));
   const [hover, setHover] = useState<number | null>(null);

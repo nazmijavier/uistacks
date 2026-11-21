@@ -11,11 +11,13 @@ import {
   useSyncExternalStore,
   type FocusEvent,
   type HTMLAttributes,
+  type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent,
   type ReactElement,
   type ReactNode,
   type RefObject,
 } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X } from "lucide-react";
 
@@ -51,6 +53,10 @@ export interface PopoverProps {
   align?: PopoverAlign;
   /** Flip and shift to stay inside the viewport. Turn it off for a panel that is always open in a fixed frame. */
   avoidCollisions?: boolean;
+  /** Render the panel in `document.body` with fixed positioning, so a parent with `overflow: hidden` or its own
+   *  stacking context can't clip or cover it. Tab still walks trigger → panel → the control after the trigger, and a
+   *  trigger inside `.dark` keeps the panel dark. */
+  portal?: boolean;
   /** Panel width in px, never wider than the viewport minus 16. */
   width?: number;
   arrow?: boolean;
@@ -72,6 +78,8 @@ const GAP = 10; // trigger to panel, arrow included
 const EDGE = 8; // kept free at the viewport edge
 const spring = { type: "spring", stiffness: 520, damping: 34 } as const;
 const focusRing = "outline-none focus-visible:ring-2 focus-visible:ring-[var(--select)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]";
+/** Every open panel, with the wrapper of the trigger that owns it. */
+const owners = new WeakMap<Element, RefObject<HTMLDivElement | null>>();
 const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /** The kit's rounded tip in the panel colour, with the panel's 1 px edge on its two sides. */
@@ -101,6 +109,7 @@ export function Popover({
   placement = "bottom",
   align = "center",
   avoidCollisions = true,
+  portal = false,
   width = 320,
   arrow = true,
   open: openProp,
@@ -114,17 +123,28 @@ export function Popover({
 }: PopoverProps) {
   const id = useId();
   const reduce = useReduce();
+  const hydrated = useSyncExternalStore(noSubscribe, () => true, () => false);
   const [inner, setInner] = useState(defaultOpen);
   const open = !disabled && (openProp ?? inner);
   // `y` is the gap from the wrapper's top (panel below) or bottom (panel above) edge to the panel,
   // measured from the trigger, so a wrapper stretched by its parent still places it right.
-  const [pos, setPos] = useState({ side: placement, left: 0, y: GAP, arrow: width / 2, ready: false });
+  const [pos, setPos] = useState({ side: placement, left: 0, y: GAP, arrow: width / 2, dark: false, ready: false });
   const wrap = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement | null>(null);
   const [engaged, setEngaged] = useState(false); // opened from the trigger: focus moves in and Escape belongs to it
   const [restoreOnExit, setRestoreOnExit] = useState(false);
 
   const triggerEl = () => wrap.current?.firstElementChild as HTMLElement | null;
+  /** In the trigger or the panel, wherever the panel is rendered. */
+  const holds = (node: Node | null) => {
+    // A popover nested in this panel may have its own panel in the body: follow it back to its trigger.
+    for (let n = node; n; ) {
+      if (wrap.current?.contains(n) || panel.current?.contains(n)) return true;
+      const host = (n instanceof Element ? n : n.parentElement)?.closest("[data-popover-portal]");
+      n = (host && owners.get(host)?.current) ?? null;
+    }
+    return false;
+  };
 
   const setOpen = useCallback(
     (next: boolean) => {
@@ -152,8 +172,11 @@ export function Popover({
     const t0 = w?.firstElementChild;
     if (!w || !c || !t0) return;
     const t = t0.getBoundingClientRect();
-    const box = w.getBoundingClientRect();
-    const k = w.offsetWidth ? box.width / w.offsetWidth : 1; // a zoomed or scaled parent
+    // In the body the panel is fixed, so it is placed from the viewport's edges instead of the wrapper's.
+    const rect = w.getBoundingClientRect();
+    const box = portal ? { left: 0, top: 0, bottom: document.documentElement.clientHeight || window.innerHeight } : rect;
+    const k = !portal && w.offsetWidth ? rect.width / w.offsetWidth : 1; // a zoomed or scaled parent
+    const dark = portal && !!w.closest(".dark"); // the body is outside a nested dark scope
     const cw = c.offsetWidth * k;
     const ch = c.offsetHeight * k;
     const below = window.innerHeight - t.bottom - GAP;
@@ -167,13 +190,14 @@ export function Popover({
     const arrowX = Math.min(Math.max((t.left + t.width / 2 - box.left) / k - left, 18), c.offsetWidth - 18);
     const y = side === "bottom" ? (t.bottom - box.top) / k + GAP : (box.bottom - t.top) / k + GAP;
     setPos((p) =>
-      p.side === side && Math.abs(p.left - left) < 0.5 && Math.abs(p.y - y) < 0.5 && Math.abs(p.arrow - arrowX) < 0.5 && p.ready ? p : { side, left, y, arrow: arrowX, ready: true }
+      p.side === side && Math.abs(p.left - left) < 0.5 && Math.abs(p.y - y) < 0.5 && Math.abs(p.arrow - arrowX) < 0.5 && p.dark === dark && p.ready ? p : { side, left, y, arrow: arrowX, dark, ready: true }
     );
-  }, [placement, align, avoidCollisions]);
+  }, [placement, align, avoidCollisions, portal]);
 
   const panelRef = useCallback(
     (node: HTMLDivElement | null) => {
       panel.current = node;
+      if (node) owners.set(node, wrap);
       if (node) place();
     },
     [place]
@@ -183,14 +207,21 @@ export function Popover({
   // leaves the key to the page); a press outside both the trigger and the panel closes it too.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (e.key !== "Escape" || e.defaultPrevented) return;
-    const inside = !!wrap.current?.contains(document.activeElement);
+    const focused = document.activeElement;
+    const inside = holds(focused);
+    // Focus on the trigger or in the panel of a popover nested in this one: the key is the inner one's.
+    const nested = Array.from(document.querySelectorAll("[data-popover-panel]")).some((q) => {
+      const w = owners.get(q)?.current;
+      return q !== panel.current && !!w && w !== wrap.current && holds(w) && (w.contains(focused) || q.contains(focused));
+    });
+    if (nested) return;
     if (!inside && !engaged) return;
     e.preventDefault();
     close(inside);
   });
   const onOutside = useEffectEvent((e: PointerEvent) => {
     const target = e.target as Element | null;
-    if (!target || wrap.current?.contains(target)) return;
+    if (!target || holds(target)) return;
     // Clicking another control lets it keep the focus; clicking empty page sends focus home.
     const inside = !!panel.current?.contains(document.activeElement);
     close(inside && !target.closest(FOCUSABLE));
@@ -242,7 +273,34 @@ export function Popover({
   // Tab past the last control (or Shift+Tab out of the trigger) closes it without pulling focus back.
   const onBlur = (e: FocusEvent<HTMLDivElement>) => {
     const next = e.relatedTarget as Node | null;
-    if (open && next && !wrap.current?.contains(next)) close(false);
+    if (open && next && !holds(next)) close(false);
+  };
+
+  // The panel in the body is out of the tab order's reach: Tab from the trigger steps in, Tab past the last
+  // control goes on from the trigger, and Shift+Tab from the first one returns to it.
+  const onTab = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    const c = panel.current;
+    const t = triggerEl();
+    if (e.key !== "Tab" || e.defaultPrevented || !open || !c || !t) return;
+    const target = e.target as HTMLElement;
+    const items = Array.from(c.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((el) => el.getClientRects().length > 0);
+    if (t.contains(target)) {
+      if (e.shiftKey) return;
+      e.preventDefault();
+      (items[0] ?? c).focus({ preventScroll: true });
+    } else if (c.contains(target)) {
+      const edge = e.shiftKey ? target === c || target === items[0] : target === (items[items.length - 1] ?? c);
+      if (!edge) return;
+      // Forward: the browser's own Tab moves on from the trigger. The panel is inert for that one step, so Tab
+      // can't land back in it when the trigger is the last stop on the page.
+      if (e.shiftKey) e.preventDefault();
+      else {
+        c.inert = true;
+        setTimeout(() => (c.inert = false));
+        close(false);
+      }
+      t.focus({ preventScroll: true });
+    }
   };
 
   // Clicks on the trigger bubble here, after its own onClick (which can preventDefault to keep it shut).
@@ -256,22 +314,27 @@ export function Popover({
     }
   };
 
+  // The body only exists after hydration; until then a portalled panel is not rendered.
+  const layer = (node: ReactNode) => (portal ? hydrated && createPortal(node, document.body) : node);
   const top = pos.side === "top";
   const from = reduce ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: top ? 6 : -6 };
   const api: PopoverApi = { close: () => close(true) };
 
   return (
-    <div ref={wrap} onBlur={onBlur} onClick={toggle} className="relative inline-flex">
+    <div ref={wrap} onBlur={onBlur} onClick={toggle} onKeyDown={portal ? onTab : undefined} className="relative inline-flex">
       {cloneElement(trigger, {
         "aria-haspopup": "dialog",
         "aria-expanded": open,
         "aria-controls": open ? id : undefined,
       })}
+      {layer(
       <AnimatePresence onExitComplete={restore}>
         {open && (
           <motion.div
             ref={panelRef}
             id={id}
+            data-popover-panel=""
+            data-popover-portal={portal ? "" : undefined}
             role="dialog"
             aria-labelledby={title ? `${id}-title` : undefined}
             aria-describedby={description ? `${id}-desc` : undefined}
@@ -282,7 +345,7 @@ export function Popover({
             exit={{ ...from, transition: { duration: 0.12 } }}
             transition={spring}
             style={{ width, maxWidth: `calc(100vw - ${EDGE * 2}px)`, left: pos.left, [top ? "bottom" : "top"]: pos.y, transformOrigin: `${pos.arrow}px ${top ? "100%" : "0%"}` }}
-            className={`absolute z-50 rounded-[16px] bg-surface text-left text-[14px] leading-5 text-fg shadow-[var(--shadow-overlay)] outline-none dark:bg-raised ${className}`}
+            className={`${portal ? `fixed ${pos.dark ? "dark" : ""}` : "absolute"} z-50 rounded-[16px] bg-surface text-left text-[14px] leading-5 text-fg shadow-[var(--shadow-overlay)] outline-none dark:bg-raised ${className}`}
           >
             {arrow && <Arrow side={pos.side} x={pos.arrow} />}
             {(title || description) && (
@@ -314,6 +377,7 @@ export function Popover({
           </motion.div>
         )}
       </AnimatePresence>
+      )}
     </div>
   );
 }
