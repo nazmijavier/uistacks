@@ -38,6 +38,8 @@ export interface FilterChipsProps {
   /** The text link that clears the selection; it shows while something is selected. False hides it. */
   clearLabel?: string | false;
   size?: FilterChipsSize;
+  /** BCP 47 locale for the counts, e.g. "id-ID" for 1.250. Default "en-US". */
+  locale?: string;
   disabled?: boolean;
   /** Names the group for screen readers, e.g. "Filter by stage". */
   "aria-label"?: string;
@@ -71,6 +73,7 @@ export function FilterChips({
   allCount,
   clearLabel = "Clear",
   size = "md",
+  locale = "en-US",
   disabled = false,
   "aria-label": ariaLabel = "Filters",
   className = "",
@@ -184,7 +187,7 @@ export function FilterChips({
             {o.icon && <span className={`flex shrink-0 ${active ? "" : "text-fg-muted"}`}>{o.icon}</span>}
             <span>{o.label}</span>
             {o.count !== undefined && (
-              <span className={`tabular-nums ${s.count} ${active ? "text-select-text/70" : "text-fg-subtle"}`}>{o.count.toLocaleString("en-US")}</span>
+              <span className={`tabular-nums ${s.count} ${active ? "text-select-text/70" : "text-fg-subtle"}`}>{o.count.toLocaleString(locale)}</span>
             )}
           </motion.button>
         );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { animate, motion, useInView, useReducedMotion } from "motion/react";
 import { Check } from "lucide-react";
 
@@ -30,11 +30,12 @@ export interface RingStatsProps {
   /** Ring width in px (default 12) and the space between rings (default 4). */
   thickness?: number;
   gap?: number;
+  /** BCP 47 locale for rings without their own `format`, e.g. "id-ID" for 1.250. Default "en-US". */
+  locale?: string;
   className?: string;
 }
 
 const ease = [0.22, 1, 0.36, 1] as const;
-const plain = (v: number) => Math.round(v).toLocaleString("en-US");
 /** Accent first, then mono steps of the accent and the ink. */
 const STEPS = ["var(--series-1)", "color-mix(in srgb, var(--series-1) 48%, var(--surface))", "color-mix(in srgb, var(--fg) 34%, var(--surface))"];
 
@@ -65,7 +66,8 @@ function Rolling({ value, run, format, reduce }: { value: number; run: boolean; 
   return <>{format(shown)}</>;
 }
 
-export function RingStats({ rings, title, description, center, size = 148, thickness = 12, gap = 4, className = "" }: RingStatsProps) {
+export function RingStats({ rings, title, description, center, size = 148, thickness = 12, gap = 4, locale = "en-US", className = "" }: RingStatsProps) {
+  const plain = useCallback((v: number) => Math.round(v).toLocaleString(locale), [locale]);
   const reduce = useReduce();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.4 });
