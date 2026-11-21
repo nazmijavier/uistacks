@@ -58,6 +58,9 @@ const enter = (i: number, reduce: boolean) => ({
   transition: { type: "spring" as const, stiffness: 480, damping: 32, delay: 0.05 * i },
 });
 
+/** A key that stays unique when two entries share a name. */
+const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
+
 export function Suggestions({ items, variant = "chips", onSelect, className = "" }: SuggestionsProps) {
   const reduce = useReduce();
   if (variant === "cards") {
@@ -67,7 +70,7 @@ export function Suggestions({ items, variant = "chips", onSelect, className = ""
         <div className="grid gap-3 @[480px]:grid-cols-2">
           {items.map((it, i) => (
             <motion.button
-              key={it.label}
+              key={keyAt(items.map((x) => x.label), i)}
               type="button"
               onClick={() => onSelect?.(it.label)}
               {...enter(i, reduce)}
@@ -88,7 +91,7 @@ export function Suggestions({ items, variant = "chips", onSelect, className = ""
     return (
       <ul className={`w-full ${className}`}>
         {items.map((it, i) => (
-          <motion.li key={it.label} {...enter(i, reduce)}>
+          <motion.li key={keyAt(items.map((x) => x.label), i)} {...enter(i, reduce)}>
             <button
               type="button"
               onClick={() => onSelect?.(it.label)}
@@ -113,7 +116,7 @@ export function Suggestions({ items, variant = "chips", onSelect, className = ""
     <div className={`flex flex-wrap gap-2 ${className}`}>
       {items.map((it, i) => (
         <motion.button
-          key={it.label}
+          key={keyAt(items.map((x) => x.label), i)}
           type="button"
           onClick={() => onSelect?.(it.label)}
           {...enter(i, reduce)}

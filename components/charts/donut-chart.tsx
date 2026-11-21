@@ -69,6 +69,9 @@ function Rolling({ value, run, format, reduce }: { value: number; run: boolean; 
   return <>{format(shown)}</>;
 }
 
+/** A key that stays unique when two entries share a name. */
+const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
+
 export function DonutChart({
   slices,
   title,
@@ -157,7 +160,7 @@ export function DonutChart({
                 const length = Math.min(f, Math.max(0, sweep - starts[i])) - (f > gap * 2 ? gap : 0);
                 const on = active === i;
                 return (
-                  <g key={s.label} transform={`rotate(${r2((starts[i] + (f > gap * 2 ? gap / 2 : 0)) * 360 - 90)} ${c} ${c})`}>
+                  <g key={keyAt(slices.map((x) => x.label), i)} transform={`rotate(${r2((starts[i] + (f > gap * 2 ? gap / 2 : 0)) * 360 - 90)} ${c} ${c})`}>
                     <motion.circle
                       cx={c}
                       cy={c}
@@ -190,7 +193,7 @@ export function DonutChart({
             {slices.map((s, i) => {
               const on = active === i;
               return (
-                <li key={s.label} className="min-w-0">
+                <li key={keyAt(slices.map((x) => x.label), i)} className="min-w-0">
                   <motion.button
                     ref={(el: HTMLButtonElement | null) => {
                       buttons.current[i] = el;

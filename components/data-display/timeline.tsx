@@ -101,6 +101,9 @@ function Chip({ a }: { a: TimelineAttachment }) {
   );
 }
 
+/** A key that stays unique when two entries share a name. */
+const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
+
 export function Timeline({
   events,
   visible,
@@ -190,8 +193,8 @@ export function Timeline({
                         {e.body && <div className="mt-1 text-[13px] leading-5 text-fg-muted">{e.body}</div>}
                         {e.attachments && e.attachments.length > 0 && (
                           <div className="mt-2 flex min-w-0 flex-wrap gap-1.5">
-                            {e.attachments.map((a) => (
-                              <Chip key={a.name} a={a} />
+                            {e.attachments.map((a, ai, all) => (
+                              <Chip key={keyAt(all.map((x) => x.name), ai)} a={a} />
                             ))}
                           </div>
                         )}

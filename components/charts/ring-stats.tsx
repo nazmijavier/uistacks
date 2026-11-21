@@ -65,6 +65,9 @@ function Rolling({ value, run, format, reduce }: { value: number; run: boolean; 
   return <>{format(shown)}</>;
 }
 
+/** A key that stays unique when two entries share a name. */
+const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
+
 export function RingStats({ rings, title, description, center, size = 148, thickness = 12, gap = 4, className = "" }: RingStatsProps) {
   const reduce = useReduce();
   const ref = useRef<HTMLDivElement>(null);
@@ -93,7 +96,7 @@ export function RingStats({ rings, title, description, center, size = 148, thick
               const color = r.color ?? STEPS[Math.min(i, STEPS.length - 1)];
               const p = Math.min(1, Math.max(0, share(r)));
               return (
-                <g key={r.label} onPointerEnter={() => setActive(i)} onPointerLeave={() => setActive(null)}>
+                <g key={keyAt(rings.map((x) => x.label), i)} onPointerEnter={() => setActive(i)} onPointerLeave={() => setActive(null)}>
                   <circle cx={c} cy={c} r={radius} fill="none" stroke="color-mix(in srgb, var(--fg) 7%, transparent)" strokeWidth={thickness} />
                   <motion.circle
                     cx={c}
@@ -133,7 +136,7 @@ export function RingStats({ rings, title, description, center, size = 148, thick
             const met = r.value >= r.goal;
             return (
               <li
-                key={r.label}
+                key={keyAt(rings.map((x) => x.label), i)}
                 onPointerEnter={() => setActive(i)}
                 onPointerLeave={() => setActive(null)}
                 className="flex min-w-0 flex-col transition-opacity duration-150"

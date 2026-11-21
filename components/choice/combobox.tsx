@@ -96,6 +96,9 @@ function Highlight({ text, query }: { text: string; query: string }) {
   );
 }
 
+/** A key that stays unique when two entries share a name. */
+const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
+
 export function Combobox({
   options,
   value,
@@ -392,7 +395,7 @@ export function Combobox({
                     );
                   });
                   return g.label ? (
-                    <div key={g.label} role="group" aria-labelledby={`${uid}-group-${gi}`} className={`flex flex-col gap-0.5 ${gi > 0 ? "mt-1 border-t border-border pt-1" : ""}`}>
+                    <div key={keyAt(visibleGroups.map((x) => x.label), gi)} role="group" aria-labelledby={`${uid}-group-${gi}`} className={`flex flex-col gap-0.5 ${gi > 0 ? "mt-1 border-t border-border pt-1" : ""}`}>
                       <div role="presentation" id={`${uid}-group-${gi}`} className="px-2.5 pb-1 pt-1.5 text-xs font-medium leading-4 text-fg-subtle">
                         {g.label}
                       </div>

@@ -80,6 +80,9 @@ function Check({ reduce }: { reduce: boolean }) {
   );
 }
 
+/** A key that stays unique when two entries share a name. */
+const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
+
 export function PasswordInput({
   label,
   hint,
@@ -242,7 +245,7 @@ export function PasswordInput({
           </div>
           <ul className="mt-2 flex flex-col gap-1">
             {rules.map((r, i) => (
-              <li key={r.label} className={`flex items-center gap-2 text-xs leading-4 transition-colors ${results[i] ? "text-fg" : "text-fg-muted"}`}>
+              <li key={keyAt(rules.map((x) => x.label), i)} className={`flex items-center gap-2 text-xs leading-4 transition-colors ${results[i] ? "text-fg" : "text-fg-muted"}`}>
                 <span className={`flex size-4 shrink-0 ${results[i] ? "text-success-text" : "text-fg-subtle"}`}>
                   {results[i] ? <Check reduce={reduce} /> : <Minus size={16} strokeWidth={1.5} aria-hidden />}
                 </span>
