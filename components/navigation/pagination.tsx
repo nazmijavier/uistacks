@@ -305,6 +305,8 @@ export function Pagination({
   }
 
   const slots = pageSlots(page, count, Math.max(0, siblings));
+  // Four-digit pages don't fit a phone-width row: there the neighbours step aside and the arrows reach them.
+  const tight = count >= 1000;
 
   return (
     // Narrower than 560 px: two aligned rows (size + range, then the pager edge to edge). Wider: one row.
@@ -327,7 +329,7 @@ export function Pagination({
         <ul className="flex items-center gap-0.5">
           {slots.map((s) =>
             typeof s === "number" ? (
-              <li key={s}>
+              <li key={s} className={tight && s !== page && s !== 1 && s !== count ? "@max-[560px]:hidden" : undefined}>
                 <button
                   type="button"
                   aria-label={`Page ${nf.format(s)}`}
