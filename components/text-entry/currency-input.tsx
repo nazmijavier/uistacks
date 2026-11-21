@@ -207,9 +207,17 @@ export function CurrencyInput({
   const [ownCurrency, setOwnCurrency] = useState(defaultCurrency ?? currencies[0].code);
   const current = currencies.find((c) => c.code === (currencyProp ?? ownCurrency)) ?? currencies[0];
   const d = current.decimals ?? 2;
-  const { dec, other, counted, shape, parse, full } = useMemo(() => notation(locale), [locale]);
+  const fmt = useMemo(() => notation(locale), [locale]);
+  const { dec, other, counted, shape, parse, full } = fmt;
 
   const [text, setText] = useState(defaultValue === null ? "" : full(defaultValue, d));
+  // A new locale rewrites the text: read with the old marks, "1,234.56" would otherwise turn into 1.23456.
+  const [wrote, setWrote] = useState(fmt);
+  if (wrote !== fmt) {
+    setWrote(fmt);
+    const n = wrote.parse(text);
+    setText(n === null ? "" : full(n, d));
+  }
   // A controlled value that no longer matches the text wins (it was set from outside).
   const shown = value !== undefined && parse(text) !== value ? (value === null ? "" : full(value, d)) : text;
 
