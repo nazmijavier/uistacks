@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, CircleCheck, Copy, Ellipsis, RotateCw, ThumbsDown, ThumbsUp, X } from "lucide-react";
 
@@ -65,8 +65,14 @@ export function Feedback({
   const [picked, setPicked] = useState<string[]>(defaultReasons);
   const [comment, setComment] = useState("");
   const [stage, setStage] = useState<"idle" | "open" | "sent">(defaultOpen ? "open" : "idle");
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(0); // counts copies; 0 hides the check
   const reduce = useReduce();
+  // Each copy restarts the wait, so a second click never loses its check early.
+  useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(0), 1400);
+    return () => clearTimeout(t);
+  }, [copied]);
   const downRef = useRef<HTMLButtonElement>(null);
   const focusCard = useRef(false);
   const titleId = useId();
@@ -87,10 +93,7 @@ export function Feedback({
           className={iconBtn}
           onClick={() => {
             onCopy?.();
-            const show = () => {
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1400);
-            };
+            const show = () => setCopied((n) => n + 1);
             // With `text`, the check waits for the clipboard write and never shows if it fails.
             if (text === undefined) show();
             else navigator.clipboard?.writeText(text).then(show).catch(() => {});
