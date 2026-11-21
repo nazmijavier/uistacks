@@ -34,7 +34,7 @@ export interface PaginationProps {
   showRange?: boolean;
   /** Noun after the total, e.g. "invoices" → “21–40 of 312 invoices”. */
   itemLabel?: string;
-  /** BCP 47 locale for the numbers, e.g. "id-ID" for 1.250. Default "en-US". */
+  /** BCP 47 locale for the item range and totals, e.g. "id-ID" for 1.250. Page numbers are never grouped. Default "en-US". */
   locale?: string;
   disabled?: boolean;
   /** Accessible name of the nav landmark. */
