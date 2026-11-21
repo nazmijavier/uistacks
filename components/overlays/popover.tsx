@@ -207,7 +207,11 @@ export function Popover({
   // leaves the key to the page); a press outside both the trigger and the panel closes it too.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (e.key !== "Escape" || e.defaultPrevented) return;
-    const inside = holds(document.activeElement);
+    const focused = document.activeElement;
+    const inside = holds(focused);
+    // Focus in a popover nested in this one: the key is the inner one's.
+    const own = focused?.closest("[data-popover-panel]");
+    if (inside && own && own !== panel.current) return;
     if (!inside && !engaged) return;
     e.preventDefault();
     close(inside);
@@ -326,6 +330,7 @@ export function Popover({
           <motion.div
             ref={panelRef}
             id={id}
+            data-popover-panel=""
             data-popover-portal={portal ? "" : undefined}
             role="dialog"
             aria-labelledby={title ? `${id}-title` : undefined}
