@@ -37,6 +37,8 @@ export interface DateChipProps extends Omit<ComponentProps<"span">, "children"> 
   icon?: boolean;
   /** What the date is, read before it by screen readers: "Due Friday, October 31". */
   label?: string;
+  /** BCP 47 locale for the date itself, e.g. "id-ID" for "31 Okt". The words around it ("Due", "Tomorrow") stay English; use `children` and `label` for those. Default "en-US". */
+  locale?: string;
   /** Replace the words; the state still sets the glyph and the tone. */
   children?: ReactNode;
 }
@@ -73,15 +75,15 @@ export function getDateChipState(date: DateInput, { now, doneAt, dueSoonDays = 2
 }
 
 const formats = new Map<string, Intl.DateTimeFormat>();
-function format(d: Date, opts: Intl.DateTimeFormatOptions) {
-  const key = JSON.stringify(opts);
+function format(d: Date, opts: Intl.DateTimeFormatOptions, locale: string) {
+  const key = locale + JSON.stringify(opts);
   let f = formats.get(key);
-  if (!f) formats.set(key, (f = new Intl.DateTimeFormat("en-US", opts)));
+  if (!f) formats.set(key, (f = new Intl.DateTimeFormat(locale, opts)));
   return f.format(d);
 }
 /** "Oct 31", with the year only when it is not this year's. */
-const short = (d: Date, today: Date | null) => format(d, today && d.getFullYear() !== today.getFullYear() ? { month: "short", day: "numeric", year: "numeric" } : { month: "short", day: "numeric" });
-const long = (d: Date) => format(d, { weekday: "long", month: "long", day: "numeric" });
+const short = (d: Date, today: Date | null, locale: string) => format(d, today && d.getFullYear() !== today.getFullYear() ? { month: "short", day: "numeric", year: "numeric" } : { month: "short", day: "numeric" }, locale);
+const long = (d: Date, locale: string) => format(d, { weekday: "long", month: "long", day: "numeric" }, locale);
 
 // The viewer's day, after hydration only (the server and the first client render show the plain date).
 function subscribeDay(onChange: () => void) {
@@ -154,6 +156,7 @@ export function DateChip({
   fill = "muted",
   icon = true,
   label = "Due",
+  locale = "en-US",
   children,
   className = "",
   style,
@@ -184,19 +187,19 @@ export function DateChip({
   let spoken: string;
   if (state === "done") {
     const d = closed ?? due;
-    words = `Done ${short(d, today)}`;
-    spoken = `Done ${long(d)}`;
+    words = `Done ${short(d, today, locale)}`;
+    spoken = `Done ${long(d, locale)}`;
   } else if (state === "overdue") {
     const late = left !== null && left < 0 ? -left : 0;
-    words = late ? `${short(due, today)} · ${late}d late` : short(due, today);
-    spoken = `Overdue: ${lower} ${long(due)}${late ? `, ${late} ${late === 1 ? "day" : "days"} late` : ""}`;
+    words = late ? `${short(due, today, locale)} · ${late}d late` : short(due, today, locale);
+    spoken = `Overdue: ${lower} ${long(due, locale)}${late ? `, ${late} ${late === 1 ? "day" : "days"} late` : ""}`;
   } else if (state === "due-soon" && left !== null && left >= 0) {
     const rel = left === 0 ? "Today" : left === 1 ? "Tomorrow" : `In ${left} days`;
     words = rel;
-    spoken = `${label} ${rel.toLowerCase()}, ${long(due)}`;
+    spoken = `${label} ${rel.toLowerCase()}, ${long(due, locale)}`;
   } else {
-    words = short(due, today);
-    spoken = `${label} ${long(due)}`;
+    words = short(due, today, locale);
+    spoken = `${label} ${long(due, locale)}`;
   }
 
   const pill = variant === "pill";

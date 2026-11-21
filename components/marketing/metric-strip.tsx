@@ -24,6 +24,8 @@ export interface MetricStripProps {
   duration?: number;
   /** Shows the final numbers without counting (also under reduced motion). */
   paused?: boolean;
+  /** BCP 47 locale for the numbers, e.g. "id-ID" for 1.250. Default "en-US". */
+  locale?: string;
   /** An accessible name for the list, e.g. "UI Stacks in numbers". */
   "aria-label"?: string;
   className?: string;
@@ -38,23 +40,23 @@ function useReduce() {
   return hydrated && Boolean(prefers);
 }
 
-const fmt = (n: number, decimals = 0) => n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+const fmt = (n: number, decimals = 0, locale = "en-US") => n.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
 /** The number itself: counts from 0 once `run` turns true; the screen reader always gets the final value. */
-function Count({ m, run, still, duration, delay }: { m: Metric; run: boolean; still: boolean; duration: number; delay: number }) {
+function Count({ m, run, still, duration, delay, locale }: { m: Metric; run: boolean; still: boolean; duration: number; delay: number; locale: string }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const final = `${m.prefix ?? ""}${fmt(m.value, m.decimals)}${m.suffix ?? ""}`;
+  const final = `${m.prefix ?? ""}${fmt(m.value, m.decimals, locale)}${m.suffix ?? ""}`;
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const paint = (n: number) => (el.textContent = `${m.prefix ?? ""}${fmt(n, m.decimals)}${m.suffix ?? ""}`);
+    const paint = (n: number) => (el.textContent = `${m.prefix ?? ""}${fmt(n, m.decimals, locale)}${m.suffix ?? ""}`);
     if (still) return void paint(m.value);
     if (!run) return void paint(0);
     // Written straight to the DOM, so a count-up never re-renders the strip 60 times a second.
     const c = animate(0, m.value, { duration: duration / 1000, delay: delay / 1000, ease: [0.16, 1, 0.3, 1], onUpdate: paint });
     return () => c.stop();
-  }, [run, still, duration, delay, m.value, m.decimals, m.prefix, m.suffix]);
+  }, [run, still, duration, delay, m.value, m.decimals, m.prefix, m.suffix, locale]);
 
   return (
     <>
@@ -70,7 +72,7 @@ function Count({ m, run, still, duration, delay }: { m: Metric; run: boolean; st
  * A row of big stats with a label and an optional change line each. The numbers count up the first time the strip
  * scrolls into view, in tabular figures so nothing jitters; hairlines divide the stats in every layout.
  */
-export function MetricStrip({ metrics, duration = 1400, paused = false, className = "", ...aria }: MetricStripProps) {
+export function MetricStrip({ metrics, duration = 1400, paused = false, locale = "en-US", className = "", ...aria }: MetricStripProps) {
   const reduce = useReduce();
   const root = useRef<HTMLDListElement>(null);
   const inView = useInView(root, { once: true, amount: 0.4 });
@@ -93,7 +95,7 @@ export function MetricStrip({ metrics, duration = 1400, paused = false, classNam
           <div key={i} className={`flex flex-col border-[color-mix(in_srgb,var(--fg)_9%,transparent)] px-5 py-5 @3xl:px-6 @3xl:py-6 ${line(i)}`}>
             <dt className="order-2 mt-1 text-[14px] leading-5 text-fg-muted">{m.label}</dt>
             <dd className="order-1 text-[32px] font-medium leading-10 tracking-[-0.03em] text-fg @3xl:text-[36px] @3xl:leading-[44px]">
-              <Count m={m} run={inView} still={still} duration={duration} delay={i * 90} />
+              <Count m={m} run={inView} still={still} duration={duration} delay={i * 90} locale={locale} />
             </dd>
             {m.delta && (
               <dd

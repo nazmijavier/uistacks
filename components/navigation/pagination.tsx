@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -34,6 +34,8 @@ export interface PaginationProps {
   showRange?: boolean;
   /** Noun after the total, e.g. "invoices" → “21–40 of 312 invoices”. */
   itemLabel?: string;
+  /** BCP 47 locale for the numbers, e.g. "id-ID" for 1.250. Default "en-US". */
+  locale?: string;
   disabled?: boolean;
   /** Accessible name of the nav landmark. */
   "aria-label"?: string;
@@ -42,7 +44,6 @@ export interface PaginationProps {
 
 const spring = { type: "spring", stiffness: 520, damping: 34 } as const;
 const focusRing = "outline-none focus-visible:ring-2 focus-visible:ring-[var(--select)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]";
-const nf = new Intl.NumberFormat("en-US");
 
 type Slot = number | { gap: "start" | "end"; to: number };
 
@@ -187,12 +188,14 @@ export function Pagination({
   variant = "default",
   showRange = true,
   itemLabel,
+  locale = "en-US",
   disabled = false,
   "aria-label": ariaLabel = "Pagination",
   className = "",
 }: PaginationProps) {
   const uid = useId();
   const reduce = useReduce();
+  const nf = useMemo(() => new Intl.NumberFormat(locale), [locale]);
   const [ownSize, setOwnSize] = useState(defaultPageSize ?? pageSizes[0] ?? 10);
   const size = Math.max(1, sizeProp ?? ownSize);
   const count = Math.max(1, Math.ceil(total / size));
