@@ -34,7 +34,7 @@ export interface PaginationProps {
   showRange?: boolean;
   /** Noun after the total, e.g. "invoices" → “21–40 of 312 invoices”. */
   itemLabel?: string;
-  /** BCP 47 locale for the item range and totals, e.g. "id-ID" for 1.250. Page numbers are never grouped. Default "en-US". */
+  /** BCP 47 locale for every number shown or spoken, e.g. "id-ID" for 1.250. Default "en-US". */
   locale?: string;
   disabled?: boolean;
   /** Accessible name of the nav landmark. */
@@ -63,7 +63,7 @@ function pageSlots(page: number, count: number, siblings: number): Slot[] {
 }
 
 /** “Rows per page” as a small listbox: arrows, Home / End, Enter, Escape and type a digit. */
-function PageSizeSelect({ value, options, onChange, disabled, reduce }: { value: number; options: number[]; onChange: (n: number) => void; disabled: boolean; reduce: boolean }) {
+function PageSizeSelect({ value, options, onChange, disabled, reduce, nf }: { value: number; options: number[]; onChange: (n: number) => void; disabled: boolean; reduce: boolean; nf: Intl.NumberFormat }) {
   const uid = useId();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -135,7 +135,7 @@ function PageSizeSelect({ value, options, onChange, disabled, reduce }: { value:
           Rows per page
         </span>
         <span id={`${uid}-value`} className="tabular-nums">
-          {value}
+          {nf.format(value)}
         </span>
         <motion.span aria-hidden initial={false} animate={{ rotate: open ? 180 : 0 }} transition={reduce ? { duration: 0 } : spring} className="flex text-fg-subtle">
           <ChevronDown size={16} strokeWidth={1.5} />
@@ -164,7 +164,7 @@ function PageSizeSelect({ value, options, onChange, disabled, reduce }: { value:
                     i === active ? "bg-fg/[0.06]" : ""
                   }`}
                 >
-                  {o}
+                  {nf.format(o)}
                 </div>
               ))}
             </div>
@@ -286,14 +286,14 @@ export function Pagination({
       <nav ref={nav} aria-label={ariaLabel} onKeyDown={onKeyDown} className={`inline-flex items-center gap-2 ${disabled ? "opacity-60" : ""} ${className}`}>
         {arrow(-1)}
         <span aria-live="polite" className="sr-only">
-          {announce && `Page ${page} of ${count}`}
+          {announce && `Page ${nf.format(page)} of ${nf.format(count)}`}
         </span>
         <span aria-hidden className="min-w-[96px] px-1 text-center text-[13px] leading-5 text-fg-muted tabular-nums">
           Page{" "}
           <span className="relative inline-grid overflow-hidden align-bottom">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.span key={page} {...roll} transition={reduce ? { duration: 0.12 } : spring} className="font-medium text-fg">
-                {page}
+                {nf.format(page)}
               </motion.span>
             </AnimatePresence>
           </span>{" "}
@@ -316,7 +316,7 @@ export function Pagination({
               <span aria-hidden className="whitespace-nowrap text-[13px] leading-5 text-fg-muted max-[420px]:hidden">
                 Rows per page
               </span>
-              <PageSizeSelect value={size} options={pageSizes.includes(size) ? pageSizes : [...pageSizes, size].sort((a, b) => a - b)} onChange={resize} disabled={disabled} reduce={reduce} />
+              <PageSizeSelect value={size} options={pageSizes.includes(size) ? pageSizes : [...pageSizes, size].sort((a, b) => a - b)} onChange={resize} disabled={disabled} reduce={reduce} nf={nf} />
             </div>
           )}
           {showRange && status}
@@ -330,7 +330,7 @@ export function Pagination({
               <li key={s}>
                 <button
                   type="button"
-                  aria-label={`Page ${s}`}
+                  aria-label={`Page ${nf.format(s)}`}
                   aria-current={s === page ? "page" : undefined}
                   disabled={disabled}
                   onClick={() => go(s)}
@@ -341,15 +341,15 @@ export function Pagination({
                   {s === page && (
                     <motion.span layoutId={reduce ? undefined : `${uid}-page`} transition={spring} aria-hidden className="absolute inset-0 rounded-full bg-surface shadow-[var(--shadow-control)] dark:bg-raised" />
                   )}
-                  <span className="relative">{s}</span>
+                  <span className="relative">{nf.format(s)}</span>
                 </button>
               </li>
             ) : (
               <li key={s.gap}>
                 <button
                   type="button"
-                  aria-label={`Jump to page ${s.to}`}
-                  title={`Page ${s.to}`}
+                  aria-label={`Jump to page ${nf.format(s.to)}`}
+                  title={`Page ${nf.format(s.to)}`}
                   disabled={disabled}
                   onClick={() => go(s.to)}
                   className={`grid h-8 w-7 place-items-center rounded-full text-[13px] font-medium text-fg-subtle transition-colors enabled:hover:bg-fg/[0.04] enabled:hover:text-fg ${focusRing}`}
