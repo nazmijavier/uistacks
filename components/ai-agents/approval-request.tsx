@@ -35,6 +35,9 @@ const btn =
 const secondary = `${btn} bg-surface text-fg shadow-[var(--shadow-btn-secondary)] before:bg-fg hover:before:opacity-[0.04] active:before:opacity-[0.08]`;
 const primary = `${btn} text-[var(--inverse-fg)] shadow-[var(--shadow-btn-primary)] before:bg-[var(--inverse-fg)] hover:before:opacity-[0.08] active:before:opacity-[0.14]`;
 
+/** A key that stays unique when two entries share a name. */
+const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
+
 export function ApprovalRequest({
   overline,
   title,
@@ -112,8 +115,8 @@ export function ApprovalRequest({
       {details && details.length > 0 && (
         // A narrow card tightens the label column; values wrap rather than cut a payee or an amount.
         <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 rounded-[18px] bg-subtle p-4 text-[15px] @[400px]:grid-cols-[minmax(96px,auto)_1fr] @[400px]:gap-x-6">
-          {details.map((d) => (
-            <div key={d.label} className="contents">
+          {details.map((d, i) => (
+            <div key={keyAt(details.map((x) => x.label), i)} className="contents">
               <dt className="text-fg-muted">{d.label}</dt>
               <dd className={`min-w-0 break-words text-fg ${d.mono ? "font-mono text-[14px]" : ""}`}>{d.value}</dd>
             </div>

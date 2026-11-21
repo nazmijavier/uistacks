@@ -104,8 +104,8 @@ function Tip({ title, rows, style, boxRef }: { title: string; rows: { color: str
     >
       <p className="text-[12px] font-medium leading-4 text-[color-mix(in_srgb,var(--inverse-fg)_64%,transparent)]">{title}</p>
       <div className="mt-2 flex flex-col gap-1.5">
-        {rows.map((row) => (
-          <div key={row.name} className="flex items-center gap-2 text-[13px] leading-5">
+        {rows.map((row, i) => (
+          <div key={keyAt(rows.map((x) => x.name), i)} className="flex items-center gap-2 text-[13px] leading-5">
             <Marker color={row.color} />
             <span className="flex-1 text-[color-mix(in_srgb,var(--inverse-fg)_64%,transparent)]">{row.name}</span>
             <span className="font-medium tabular-nums text-[var(--inverse-fg)]">{row.value}</span>
@@ -115,6 +115,9 @@ function Tip({ title, rows, style, boxRef }: { title: string; rows: { color: str
     </motion.div>
   );
 }
+
+/** A key that stays unique when two entries share a name. */
+const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
 
 export function GroupedBar({
   categories,
@@ -207,7 +210,7 @@ export function GroupedBar({
       {legend && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           {series.map((s, i) => (
-            <span key={s.name} className="inline-flex h-6 items-center gap-1.5 text-[13px] leading-5 tracking-[-0.003em] text-fg-muted">
+            <span key={keyAt(series.map((x) => x.name), i)} className="inline-flex h-6 items-center gap-1.5 text-[13px] leading-5 tracking-[-0.003em] text-fg-muted">
               <Marker color={colors[i]} />
               {s.name}
             </span>
@@ -246,7 +249,7 @@ export function GroupedBar({
             const start = (horizontal ? 0 : x0) + i * band;
             return (
               <g
-                key={c}
+                key={keyAt(categories, i)}
                 ref={(el) => {
                   refs.current[i] = el;
                 }}
@@ -284,7 +287,7 @@ export function GroupedBar({
                     const zero = horizontal ? barPath(x0, start + off, 0, thick, true) : barPath(start + off, y0 + plotH, thick, 0, false);
                     return (
                       <motion.path
-                        key={s.name}
+                        key={keyAt(series.map((x) => x.name), j)}
                         fill={colors[j]}
                         initial={{ d: reduce ? full : zero }}
                         animate={{ d: inView || reduce ? full : zero }}

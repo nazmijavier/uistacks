@@ -86,6 +86,9 @@ function useReduce() {
   return hydrated && Boolean(prefers);
 }
 
+/** A key that stays unique when two entries share a name. */
+const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
+
 export function CompareBars({
   title,
   labels,
@@ -253,7 +256,7 @@ export function CompareBars({
             const before = other && earlier ? (earlier.values[i] ?? null) : null;
             return (
               <div
-                key={name}
+                key={keyAt(labels, i)}
                 ref={(el) => {
                   bars.current[i] = el;
                 }}

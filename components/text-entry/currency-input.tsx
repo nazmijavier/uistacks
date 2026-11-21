@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type ChangeEvent, type ComponentProps, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ChangeEvent, type ComponentProps, type KeyboardEvent, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, ChevronDown } from "lucide-react";
 
@@ -24,6 +24,8 @@ export interface CurrencyInputProps extends Omit<ComponentProps<"input">, "value
   value?: number | null;
   defaultValue?: number | null;
   onValueChange?: (value: number | null) => void;
+  /** BCP 47 locale for grouping and the decimal mark, e.g. "id-ID" to type and read 1.234,56. Default "en-US". */
+  locale?: string;
   /** The currencies in the menu. Default: USD, EUR, GBP, CAD, AUD, JPY, MXN. */
   currencies?: CurrencyOption[];
   currency?: string;
@@ -59,17 +61,31 @@ function useReduce() {
   return hydrated && Boolean(prefers);
 }
 
-/** Groups the whole part and keeps what is typed after the dot (up to `d` places). */
-function shape(raw: string, d: number) {
-  const clean = raw.replace(/[^\d.]/g, "");
-  const dot = d > 0 ? clean.indexOf(".") : -1;
-  const whole = (dot >= 0 ? clean.slice(0, dot) : clean).replace(/\./g, "").replace(/^0+(?=\d)/, "");
-  const frac = dot >= 0 ? clean.slice(dot + 1).replace(/\./g, "").slice(0, d) : "";
-  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return dot >= 0 ? `${grouped || "0"}.${frac}` : grouped;
+/** How a locale writes an amount: its decimal mark, its grouping, and the way back to a number. Digits stay 0-9. */
+function notation(locale: string) {
+  const latn = { numberingSystem: "latn" } as Intl.NumberFormatOptions;
+  const dec = new Intl.NumberFormat(locale, { ...latn, minimumFractionDigits: 1 }).formatToParts(1.5).find((p) => p.type === "decimal")?.value ?? ".";
+  const whole = new Intl.NumberFormat(locale, { ...latn, maximumFractionDigits: 0 });
+  const mark = dec.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const other = new RegExp(`[^\\d${mark}]`, "g");
+  const marks = new RegExp(mark, "g");
+  const counted = new RegExp(`[\\d${mark}]`);
+  /** Groups the whole part and keeps what is typed after the decimal mark (up to `d` places). */
+  const shape = (raw: string, d: number) => {
+    const clean = raw.replace(other, "");
+    const dot = d > 0 ? clean.indexOf(dec) : -1;
+    const int = (dot >= 0 ? clean.slice(0, dot) : clean).replace(marks, "").replace(/^0+(?=\d)/, "");
+    const frac = dot >= 0 ? clean.slice(dot + 1).replace(marks, "").slice(0, d) : "";
+    const grouped = int ? whole.format(BigInt(int)) : "";
+    return dot >= 0 ? `${grouped || "0"}${dec}${frac}` : grouped;
+  };
+  const parse = (text: string) => {
+    const plain = (/[-\u2212]/.test(text) ? "-" : "") + text.replace(other, "").replace(dec, ".");
+    return plain === "" ? null : Number(plain);
+  };
+  const full = (n: number, d: number) => n.toLocaleString(locale, { ...latn, minimumFractionDigits: d, maximumFractionDigits: d });
+  return { dec, other, counted, shape, parse, full };
 }
-const parse = (text: string) => (text.replace(/,/g, "") === "" ? null : Number(text.replace(/,/g, "")));
-const full = (n: number, d: number) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
 
 const UNION = (
   <>
@@ -166,6 +182,7 @@ export function CurrencyInput({
   value,
   defaultValue = null,
   onValueChange,
+  locale = "en-US",
   currencies = CURRENCIES,
   currency: currencyProp,
   defaultCurrency,
@@ -190,8 +207,17 @@ export function CurrencyInput({
   const [ownCurrency, setOwnCurrency] = useState(defaultCurrency ?? currencies[0].code);
   const current = currencies.find((c) => c.code === (currencyProp ?? ownCurrency)) ?? currencies[0];
   const d = current.decimals ?? 2;
+  const fmt = useMemo(() => notation(locale), [locale]);
+  const { dec, other, counted, shape, parse, full } = fmt;
 
   const [text, setText] = useState(defaultValue === null ? "" : full(defaultValue, d));
+  // A new locale rewrites the text: read with the old marks, "1,234.56" would otherwise turn into 1.23456.
+  const [wrote, setWrote] = useState(fmt);
+  if (wrote !== fmt) {
+    setWrote(fmt);
+    const n = wrote.parse(text);
+    setText(n === null ? "" : full(n, d));
+  }
   // A controlled value that no longer matches the text wins (it was set from outside).
   const shown = value !== undefined && parse(text) !== value ? (value === null ? "" : full(value, d)) : text;
 
@@ -213,11 +239,15 @@ export function CurrencyInput({
   // Shapes the raw text and keeps the caret after the same digit.
   const write = (raw: string, at: number) => {
     const next = shape(raw, d);
-    // Put the caret back after the same number of digits and dots.
-    const keep = raw.slice(0, at).replace(/[^\d.]/g, "").length;
+    // Put the caret back after the same number of digits and decimal marks.
+    const keep = raw.slice(0, at).replace(other, "").length;
     let pos = 0;
-    for (let seen = 0; pos < next.length && seen < keep; pos++) if (/[\d.]/.test(next[pos])) seen++;
-    caret.current = pos;
+    for (let seen = 0; pos < next.length && seen < keep; pos++) if (counted.test(next[pos])) seen++;
+    if (next === shown && input.current) {
+      // Only a separator was removed: nothing re-renders, so put the text and the caret back by hand.
+      input.current.value = next;
+      input.current.setSelectionRange(pos, pos);
+    } else caret.current = pos;
     commit(next);
   };
 
@@ -374,12 +404,12 @@ export function CurrencyInput({
               if (e.defaultPrevented || d > 0) return;
               // A whole-unit currency drops a pasted fraction ("1,234.56" → 1,234) instead of joining its digits.
               const text = e.clipboardData.getData("text");
-              if (!text.includes(".")) return;
+              if (!text.includes(dec)) return;
               e.preventDefault();
               const el = e.currentTarget;
               const start = el.selectionStart ?? el.value.length;
               const end = el.selectionEnd ?? start;
-              const piece = text.slice(0, text.indexOf("."));
+              const piece = text.slice(0, text.indexOf(dec));
               write(el.value.slice(0, start) + piece + el.value.slice(end), start + piece.length);
             }}
             onBlur={(e) => {

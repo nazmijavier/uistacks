@@ -38,6 +38,9 @@ function useReduce() {
   return hydrated && Boolean(prefers);
 }
 
+/** A key that stays unique when two entries share a name. */
+const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
+
 export function CopyPromptBox({
   prompt,
   label = "Using an AI assistant? Paste this:",
@@ -89,7 +92,7 @@ export function CopyPromptBox({
           <ul aria-label={`Works with ${assistants.map((a) => a.name).join(", ")}`} className="flex shrink-0 items-center">
             {assistants.map((a, i) => (
               <li
-                key={a.name}
+                key={keyAt(assistants.map((x) => x.name), i)}
                 title={a.name}
                 className={`grid size-6 place-items-center rounded-full @sm:size-7 bg-surface shadow-[0_0_0_2px_var(--subtle),var(--shadow-hairline)] dark:bg-raised dark:shadow-[0_0_0_2px_var(--surface),var(--shadow-hairline)] ${i ? "-ml-1 @sm:-ml-1.5" : ""}`}
               >
