@@ -103,7 +103,7 @@ export function StarterCards({ items, layout = "card", onSelect, disabled = fals
               : "flex min-h-11 items-center gap-3 rounded-[12px] px-2 py-1.5 hover:bg-subtle"
           }`}
         >
-          {/* White tile with a hairline for an app glyph (owner, Nov 14: no grey fill); the soft violet AI tile only for the sparkle fallback. */}
+          {/* White tile with a hairline for an app glyph (no grey fill); the soft violet AI tile only for the sparkle fallback. */}
           <span
             className={`grid size-8 shrink-0 place-items-center rounded-[10px] [&_svg]:size-5 ${
               it.icon ? "bg-surface text-fg shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_10%,transparent)]" : "bg-[#eeecfc] text-[#5847c9] dark:bg-[#7c6cf0]/20 dark:text-[#b9afff]"

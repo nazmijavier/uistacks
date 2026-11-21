@@ -99,7 +99,7 @@ export function Avatar({ name, src, icon, logo, size = "md", shape = "circle", s
       {...rest}
       aria-label={label}
       className={`relative inline-flex shrink-0 select-none ${className}`}
-      // Same radius as the face, so a background passed in className follows the shape (owner, Nov 17: no square behind a photo).
+      // Same radius as the face, so a background passed in className follows the shape (no square behind a photo).
       style={{ width: s.px, height: s.px, borderRadius: shape === "circle" ? 9999 : s.radius, ...style }}
     >
       <span

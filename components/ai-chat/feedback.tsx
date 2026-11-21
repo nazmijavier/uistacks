@@ -4,7 +4,7 @@ import { useId, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, CircleCheck, Copy, Ellipsis, RotateCw, ThumbsDown, ThumbsUp, X } from "lucide-react";
 
-/** A filled thumb keeps the cut between the cuff and the hand (owner, Nov 13): two shapes with a gap, not one blob. */
+/** A filled thumb keeps the cut between the cuff and the hand: two shapes with a gap, not one blob. */
 function FilledThumb({ size, down = false }: { size: number; down?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" aria-hidden style={down ? { transform: "rotate(180deg)" } : undefined}>
