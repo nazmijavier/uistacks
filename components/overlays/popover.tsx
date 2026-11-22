@@ -283,7 +283,7 @@ export function Popover({
     const t = triggerEl();
     if (e.key !== "Tab" || e.defaultPrevented || !open || !c || !t) return;
     const target = e.target as HTMLElement;
-    const items = Array.from(c.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((el) => el.getClientRects().length > 0);
+    const items = Array.from(c.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((el) => el.tabIndex >= 0 && el.getClientRects().length > 0);
     if (t.contains(target)) {
       if (e.shiftKey) return;
       e.preventDefault();
