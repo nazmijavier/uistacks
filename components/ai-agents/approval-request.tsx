@@ -65,9 +65,10 @@ export function ApprovalRequest({
 }: ApprovalRequestProps) {
   const reduce = useReduce();
   // With reduced motion the card and its rows only fade: nothing slides, scales or spins.
-  const move = reduce ? { duration: 0.15 } : spring;
+  // The targets still name y and scale (set at once): a server-rendered card starts offset and has to settle.
+  const move = reduce ? { duration: 0.15, y: { duration: 0 }, scale: { duration: 0 } } : spring;
   const from = reduce ? { opacity: 0 } : { opacity: 0, y: 6 };
-  const to = reduce ? { opacity: 1 } : { opacity: 1, y: 0 };
+  const to = { opacity: 1, y: 0 };
   const out = reduce ? { opacity: 0 } : { opacity: 0, y: -6 };
   const [inner, setInner] = useState<ApprovalStatus>(defaultStatus);
   const status = statusProp ?? inner;
@@ -101,7 +102,7 @@ export function ApprovalRequest({
     <motion.div
       layout={!reduce}
       initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.98 }}
-      animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={move}
       className={`@container w-full max-w-[460px] rounded-[20px] bg-surface p-5 shadow-[var(--shadow-card)] ${className}`}
     >
