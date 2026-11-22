@@ -263,7 +263,7 @@ export function Pagination({
   };
 
   const status = (
-    <p className="flex min-w-0 items-center gap-1 overflow-hidden text-[13px] leading-5 text-fg-muted tabular-nums">
+    <p className="flex min-w-0 max-w-full items-center gap-1 overflow-hidden text-[13px] leading-5 text-fg-muted tabular-nums">
       <span aria-live="polite" className="sr-only">
         {announce && `${range} of ${nf.format(total)}${itemLabel ? ` ${itemLabel}` : ""}`}
       </span>
@@ -312,10 +312,11 @@ export function Pagination({
     // Narrower than 560 px: two aligned rows (size + range, then the pager edge to edge). Wider: one row.
     <div className={`@container flex w-full flex-wrap items-center gap-x-4 gap-y-3 ${className}`}>
       {(pageSizes.length > 0 || showRange) && (
-        <div className="flex w-full min-w-0 items-center justify-between gap-3 @[560px]:w-auto @[560px]:justify-start">
+        // The range drops to its own line rather than being cut when it does not fit beside the size select.
+        <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 @[560px]:w-auto @[560px]:justify-start">
           {pageSizes.length > 0 && (
             <div className="flex items-center gap-2">
-              <span aria-hidden className="whitespace-nowrap text-[13px] leading-5 text-fg-muted max-[420px]:hidden">
+              <span aria-hidden className="whitespace-nowrap text-[13px] leading-5 text-fg-muted @max-[420px]:hidden">
                 Rows per page
               </span>
               <PageSizeSelect value={size} options={pageSizes.includes(size) ? pageSizes : [...pageSizes, size].sort((a, b) => a - b)} onChange={resize} disabled={disabled} reduce={reduce} nf={nf} />
