@@ -232,7 +232,7 @@ export function Leaderboard({
                     e.preventDefault();
                     const next = periods[(i + (e.key === "ArrowRight" ? 1 : periods.length - 1)) % periods.length];
                     pick(next.id);
-                    (e.currentTarget.parentElement?.querySelector(`[data-id="${next.id}"]`) as HTMLElement | null)?.focus();
+                    (e.currentTarget.parentElement?.querySelector(`[data-id="${CSS.escape(next.id)}"]`) as HTMLElement | null)?.focus();
                   }}
                   className={`relative h-7 min-w-11 rounded-full px-3 text-[13px] font-medium leading-5 transition-colors duration-150 ${ring} ${
                     on ? "text-[var(--select-text)]" : "text-fg-muted hover:bg-[color-mix(in_srgb,var(--fg)_5%,transparent)] hover:text-fg"

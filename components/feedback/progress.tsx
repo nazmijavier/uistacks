@@ -96,7 +96,7 @@ export function Progress({
     role: "progressbar",
     "aria-valuemin": 0,
     "aria-valuemax": max,
-    "aria-valuenow": indeterminate ? undefined : value,
+    "aria-valuenow": indeterminate ? undefined : Math.min(max, Math.max(0, value)),
     "aria-valuetext": indeterminate ? undefined : valueText,
     "aria-labelledby": label ? labelId : undefined,
     // A fallback name without a label; an aria-label or aria-labelledby passed in overrides it.
