@@ -191,6 +191,8 @@ export function InlineEdit({
   }, [status]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // An IME is still composing (Enter picks a candidate, Escape drops it): the keys belong to it.
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
     if (e.key === "Enter") {
       e.preventDefault();
       commit(draft, true);

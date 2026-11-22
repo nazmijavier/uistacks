@@ -137,6 +137,8 @@ export function ChipInput({
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // An IME is still composing (Enter picks a candidate, Escape drops it): the keys belong to it.
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
     const el = e.currentTarget;
     const atStart = el.selectionStart === 0 && el.selectionEnd === 0;
     if (showMenu && (e.key === "ArrowDown" || e.key === "ArrowUp")) {

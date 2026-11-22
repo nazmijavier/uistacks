@@ -209,6 +209,8 @@ export function ExpandingSearch({
   }, [open, query, results]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // An IME is still composing (Enter picks a candidate, Escape drops it): the keys belong to it.
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
     if (e.key === "Enter") {
       e.preventDefault();
       if (query) onSearch?.(query);
@@ -216,6 +218,8 @@ export function ExpandingSearch({
   };
   // Escape works from anywhere inside the open search: the field or the close button.
   const onRootKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    // An IME is still composing (Enter picks a candidate, Escape drops it): the keys belong to it.
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
     if (e.key !== "Escape" || !open) return;
     e.preventDefault();
     e.stopPropagation();
