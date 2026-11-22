@@ -168,7 +168,7 @@ export function CompareBars({
     const i = periods.findIndex((p) => p.id === period.id);
     const next = periods[(i + (e.key === "ArrowRight" ? 1 : periods.length - 1)) % periods.length];
     select(next.id);
-    (e.currentTarget.parentElement?.querySelector(`[data-id="${next.id}"]`) as HTMLElement | null)?.focus();
+    (e.currentTarget.parentElement?.querySelector(`[data-id="${CSS.escape(next.id)}"]`) as HTMLElement | null)?.focus();
   };
 
   const swap = reduce ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -6 } };
