@@ -262,7 +262,13 @@ export function PhoneInput({
     if (takeInternational(raw)) return;
     setDraft(null);
     const next = onlyDigits(raw).slice(0, maxOf(country));
-    caret.current = caretAfterDigits(formatNational(next, country.format), onlyDigits(raw.slice(0, selection)).length);
+    const shaped = formatNational(next, country.format);
+    const at = caretAfterDigits(shaped, onlyDigits(raw.slice(0, selection)).length);
+    if (draft === null && shaped === text && input.current) {
+      // Only a separator or a stray character changed: nothing re-renders, so put the text and the caret back by hand.
+      input.current.value = text;
+      input.current.setSelectionRange(at, at);
+    } else caret.current = at;
     commit(country, next);
   };
 
