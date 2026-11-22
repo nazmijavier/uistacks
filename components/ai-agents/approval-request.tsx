@@ -104,7 +104,8 @@ export function ApprovalRequest({
       initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={move}
-      className={`@container w-full max-w-[460px] rounded-[20px] bg-surface p-5 shadow-[var(--shadow-card)] ${className}`}
+      // transform-none: a server-rendered card carries the slide-in offset before the preference can be read.
+      className={`@container motion-reduce:transform-none! w-full max-w-[460px] rounded-[20px] bg-surface p-5 shadow-[var(--shadow-card)] ${className}`}
     >
       <div className="flex items-start gap-3">
         <div className={`grid size-10 shrink-0 place-items-center rounded-[14px] ${high ? "bg-danger-soft text-danger" : "bg-surface shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_10%,transparent)] text-fg"}`}>
@@ -152,7 +153,7 @@ export function ApprovalRequest({
         <AnimatePresence mode="popLayout" initial={false}>
           {status === "pending" ? (
             // Deny on the left, the approvals on the right.
-            <motion.div key="pending" className="flex w-full items-center gap-1.5" initial={from} animate={to} exit={out} transition={move}>
+            <motion.div key="pending" className="flex w-full items-center gap-1.5 motion-reduce:transform-none!" initial={from} animate={to} exit={out} transition={move}>
               <button
                 type="button"
                 className={`${secondary} mr-auto`}
@@ -183,14 +184,14 @@ export function ApprovalRequest({
               key={status}
               ref={resultRef}
               tabIndex={-1}
-              className={`flex items-center gap-2 rounded-full text-[15px] font-medium outline-none ${status === "denied" ? "text-fg-muted" : "text-success"}`}
+              className={`flex items-center gap-2 rounded-full motion-reduce:transform-none! text-[15px] font-medium outline-none ${status === "denied" ? "text-fg-muted" : "text-success"}`}
               initial={from}
               animate={to}
               exit={out}
               transition={move}
             >
               <motion.span
-                className={`grid size-7 place-items-center rounded-full ${status === "denied" ? "bg-muted" : "bg-success-soft"}`}
+                className={`grid size-7 place-items-center rounded-full motion-reduce:transform-none! ${status === "denied" ? "bg-muted" : "bg-success-soft"}`}
                 initial={reduce ? false : { scale: 0.4, rotate: -30 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 520, damping: 18 }}
