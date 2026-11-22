@@ -70,6 +70,8 @@ type Piece = {
   drag: number;
   grav: number;
   wind: number;
+  /** Reduced motion: the piece stays where it was placed and only fades. */
+  still?: boolean;
   age: number;
   life: number;
 };
@@ -191,7 +193,7 @@ class Layer {
     let n = 0;
     for (const p of this.pieces) {
       p.age += dt;
-      if (p.shape !== "spark") {
+      if (p.shape !== "spark" && !p.still) {
         const k = Math.pow(1 - p.drag, dt);
         p.vx = p.vx * k + (gust * 0.04 + p.wind * 0.06) * dt;
         p.vy = p.vy * k + p.grav * dt;
@@ -379,6 +381,7 @@ export function fireConfetti(options: ConfettiOptions = {}) {
         p.size = p.shape === "spark" ? rand(11, 14) : rand(5, 7);
         p.rot = 0;
         p.life = 66;
+        p.still = true;
         return p;
       })
     );
