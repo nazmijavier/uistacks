@@ -77,6 +77,7 @@ export function ChipInput({
   const [menu, setMenu] = useState(false);
   const [active, setActive] = useState(0);
   const [flash, setFlash] = useState<string | null>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [said, setSaid] = useState("");
 
   const check = validate === undefined ? (v: string) => EMAIL.test(v) : validate;
@@ -111,7 +112,9 @@ export function ChipInput({
       const v = person?.value ?? t;
       if (next.some((c) => key(c) === key(v))) {
         setFlash(key(v));
-        setTimeout(() => setFlash(null), 700);
+        // A second duplicate restarts the flash instead of being cut short by the first timer.
+        clearTimeout(flashTimer.current);
+        flashTimer.current = setTimeout(() => setFlash(null), 700);
         setSaid(`${nameOf(v)} is already added`);
         continue;
       }
