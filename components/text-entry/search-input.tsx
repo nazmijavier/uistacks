@@ -186,6 +186,8 @@ export function SearchInput({
   }, [shortcut, disabled]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // An IME is still composing (Enter picks a candidate, Escape drops it): the keys belong to it.
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
     const k = e.key;
     if (k === "ArrowDown" || k === "ArrowUp") {
       e.preventDefault();

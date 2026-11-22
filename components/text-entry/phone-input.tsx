@@ -349,6 +349,8 @@ export function PhoneInput({
   }, [open, activeCountry, uid]);
 
   const onSearchKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    // An IME is still composing (Enter picks a candidate, Escape drops it): the keys belong to it.
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
     const last = shown.length - 1;
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();

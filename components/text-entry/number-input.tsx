@@ -173,7 +173,8 @@ export function NumberInput({
   };
 
   const parse = (t: string) => {
-    const clean = t.split(group).join("").replace(point, ".").replace(/[^\d.-]/g, "");
+    // Some locales (sv-SE, nb-NO) write the minus as U+2212, which is what the field shows before it is edited.
+    const clean = t.split(group).join("").replace(point, ".").replace(/\u2212/g, "-").replace(/[^\d.-]/g, "");
     if (!clean || clean === "-" || clean === ".") return null;
     const n = Number(clean);
     return Number.isFinite(n) ? n : null;
