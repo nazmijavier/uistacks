@@ -38,7 +38,7 @@ export interface MessageProps {
   maxSources?: number;
   /** Show copy, retry, thumbs and more under the answer. */
   actions?: boolean;
-  /** "Try again" under the answer. */
+  /** "Try again" under the answer; the button only shows when this is given. */
   onRetry?: () => void;
   /** The ••• button under the answer, e.g. to open a menu. */
   onMore?: () => void;
@@ -225,9 +225,11 @@ export function Message({
           >
             {copied ? <Check size={20} strokeWidth={1.75} /> : <Copy size={20} strokeWidth={1.5} />}
           </button>
-          <button type="button" aria-label="Try again" onClick={onRetry} className={iconBtn}>
-            <RotateCw size={20} strokeWidth={1.5} />
-          </button>
+          {onRetry && (
+            <button type="button" aria-label="Try again" onClick={onRetry} className={iconBtn}>
+              <RotateCw size={20} strokeWidth={1.5} />
+            </button>
+          )}
           {(["up", "down"] as const).map((v) => (
             <motion.button key={v} type="button" whileTap={{ scale: 0.85 }} aria-pressed={vote === v} aria-label={v === "up" ? "Good response" : "Bad response"} onClick={() => setVote(vote === v ? null : v)} className={`${iconBtn} ${vote === v ? "text-fg" : ""}`}>
               {vote === v ? <FilledThumb size={20} down={v === "down"} /> : v === "up" ? <ThumbsUp size={20} strokeWidth={1.5} /> : <ThumbsDown size={20} strokeWidth={1.5} />}
