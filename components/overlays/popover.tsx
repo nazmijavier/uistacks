@@ -289,7 +289,9 @@ export function Popover({
       e.preventDefault();
       (items[0] ?? c).focus({ preventScroll: true });
     } else if (c.contains(target)) {
-      const edge = e.shiftKey ? target === c || target === items[0] : target === (items[items.length - 1] ?? c);
+      // By position, so focus on a control outside the Tab order (tabindex -1) still finds the panel's edge.
+      const side = e.shiftKey ? Node.DOCUMENT_POSITION_PRECEDING : Node.DOCUMENT_POSITION_FOLLOWING;
+      const edge = !items.some((el) => el !== target && target.compareDocumentPosition(el) & side);
       if (!edge) return;
       // Forward: the browser's own Tab moves on from the trigger. The panel is inert for that one step, so Tab
       // can't land back in it when the trigger is the last stop on the page.
