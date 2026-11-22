@@ -168,7 +168,7 @@ export function StatCard({
   const indexAt = (e: PointerEvent<HTMLDivElement>) => {
     const r = (e.currentTarget.parentElement ?? e.currentTarget).getBoundingClientRect();
     const t = (e.clientX - r.left - PAD.left) / Math.max(r.width - PAD.left - PAD.right, 1);
-    return Math.min(n - 1, Math.max(0, Math.round(t * (n - 1))));
+    return Math.max(0, Math.min(n - 1, Math.round(t * (n - 1))));
   };
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const at = active ?? last;
@@ -178,7 +178,7 @@ export function StatCard({
       return;
     }
     e.preventDefault();
-    setActive(Math.min(n - 1, Math.max(0, next)));
+    setActive(Math.max(0, Math.min(n - 1, next)));
   };
 
   const fade = reduce ? { opacity: 0 } : { opacity: 0, y: 4 };

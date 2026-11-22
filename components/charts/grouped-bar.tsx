@@ -151,7 +151,7 @@ export function GroupedBar({
   const cap = max || undefined; // 0 would divide by zero: treat it as auto
   const step = niceStep(cap ?? dataMax, ticks);
   const top = cap ?? Math.max(step * ticks, step * Math.ceil(dataMax / step));
-  const tickValues = Array.from({ length: Math.round(top / step) + 1 }, (_, i) => i * step);
+  const tickValues = Array.from({ length: Math.floor(top / step + 1e-9) + 1 }, (_, i) => i * step);
 
   // Geometry, matching the kit frame: 44 px value axis + 12 px right room (vertical); 40 px category column (horizontal).
   const plotH = height ?? (horizontal ? 67 * n : 200);

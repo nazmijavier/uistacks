@@ -73,10 +73,12 @@ const SIZES: Record<CopyFieldSize, { field: string; text: string; secretText: st
   md: { field: "h-9 pl-3 pr-1", text: "text-[14px] leading-5", secretText: "text-[13px] leading-5" },
 };
 
-/** “uis_live_••••••••a9Xq”: the prefix up to the last underscore, eight dots, then the last four characters. */
+/** “uis_live_••••••••a9Xq”: the prefix up to the last underscore, eight dots, then the last four characters. Eight characters or fewer show dots only. */
 export function maskSecret(value: string) {
+  // A short value would be shown almost whole by its last four characters, so it gets dots only.
+  if (value.length <= 8) return "••••••••";
   const tail = value.slice(-4);
-  const head = value.slice(0, Math.max(0, value.length - 4)).match(/^.*_/)?.[0] ?? "";
+  const head = value.slice(0, value.length - 4).match(/^.*_/)?.[0] ?? "";
   return `${head}••••••••${tail}`;
 }
 
