@@ -178,7 +178,7 @@ function FoldMenu({
                 const Row = item.href ? "a" : "div";
                 return (
                   <Row
-                    key={item.id ?? item.label}
+                    key={item.id ?? `${item.label}-${i}`}
                     id={`${uid}-${i}`}
                     href={item.href}
                     role="menuitem"

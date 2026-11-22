@@ -117,6 +117,9 @@ export function AvatarStack({ people, max = 4, size = 32, spread = true, onPerso
   // A +1 chip would take the same room as the face it hides, so the stack only collapses when two or more are hidden.
   const shown = people.length > Math.max(1, max) + 1 ? people.slice(0, Math.max(1, max)) : people;
   const hidden = people.slice(shown.length);
+  // Two people may share a name: the key adds how many earlier faces had the same one.
+  const ids = shown.map((p) => p.id ?? p.name);
+  const keyOf = (i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
   const slots = shown.length + (hidden.length > 0 ? 1 : 0);
   const active = Math.min(focus, slots - 1);
   // Faces overlap by 30 % of their size; hovering the stack opens the overlap to a small gap.
@@ -143,7 +146,7 @@ export function AvatarStack({ people, max = 4, size = 32, spread = true, onPerso
     const open = tip === i;
     return (
       <Tagname
-        key={i < shown.length ? (shown[i].id ?? shown[i].name) : "more"}
+        key={i < shown.length ? keyOf(i) : "\u0000more"}
         ref={(el: HTMLElement | null) => {
           items.current[i] = el;
         }}
