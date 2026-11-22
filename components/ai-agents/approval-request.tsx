@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { CircleAlert, Check, Landmark, ShieldCheck, Timer, TriangleAlert, X } from "lucide-react";
 
 export type ApprovalStatus = "pending" | "approved" | "always" | "denied";
@@ -35,6 +35,15 @@ const btn =
 const secondary = `${btn} bg-surface text-fg shadow-[var(--shadow-btn-secondary)] before:bg-fg hover:before:opacity-[0.04] active:before:opacity-[0.08]`;
 const primary = `${btn} text-[var(--inverse-fg)] shadow-[var(--shadow-btn-primary)] before:bg-[var(--inverse-fg)] hover:before:opacity-[0.08] active:before:opacity-[0.14]`;
 
+const noSubscribe = () => () => {};
+
+/** Reduced motion, read only after hydration so the server and the first client render match. */
+function useReduce() {
+  const prefers = useReducedMotion();
+  const hydrated = useSyncExternalStore(noSubscribe, () => true, () => false);
+  return hydrated && Boolean(prefers);
+}
+
 /** A key that stays unique when two entries share a name. */
 const keyAt = (ids: string[], i: number) => `${ids[i]}\u0000${ids.slice(0, i).filter((x) => x === ids[i]).length}`;
 
@@ -54,6 +63,13 @@ export function ApprovalRequest({
   onDeny,
   className = "",
 }: ApprovalRequestProps) {
+  const reduce = useReduce();
+  // With reduced motion the card and its rows only fade: nothing slides, scales or spins.
+  // The targets still name y and scale (set at once): a server-rendered card starts offset and has to settle.
+  const move = reduce ? { duration: 0.15, y: { duration: 0 }, scale: { duration: 0 } } : spring;
+  const from = reduce ? { opacity: 0 } : { opacity: 0, y: 6 };
+  const to = { opacity: 1, y: 0 };
+  const out = reduce ? { opacity: 0 } : { opacity: 0, y: -6 };
   const [inner, setInner] = useState<ApprovalStatus>(defaultStatus);
   const status = statusProp ?? inner;
   const high = risk === "high";
@@ -84,11 +100,12 @@ export function ApprovalRequest({
 
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+      layout={!reduce}
+      initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={spring}
-      className={`@container w-full max-w-[460px] rounded-[20px] bg-surface p-5 shadow-[var(--shadow-card)] ${className}`}
+      transition={move}
+      // transform-none: a server-rendered card carries the slide-in offset before the preference can be read.
+      className={`@container motion-reduce:transform-none! w-full max-w-[460px] rounded-[20px] bg-surface p-5 shadow-[var(--shadow-card)] ${className}`}
     >
       <div className="flex items-start gap-3">
         <div className={`grid size-10 shrink-0 place-items-center rounded-[14px] ${high ? "bg-danger-soft text-danger" : "bg-surface shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_10%,transparent)] text-fg"}`}>
@@ -136,7 +153,7 @@ export function ApprovalRequest({
         <AnimatePresence mode="popLayout" initial={false}>
           {status === "pending" ? (
             // Deny on the left, the approvals on the right.
-            <motion.div key="pending" className="flex w-full items-center gap-1.5" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={spring}>
+            <motion.div key="pending" className="flex w-full items-center gap-1.5 motion-reduce:transform-none!" initial={from} animate={to} exit={out} transition={move}>
               <button
                 type="button"
                 className={`${secondary} mr-auto`}
@@ -167,17 +184,17 @@ export function ApprovalRequest({
               key={status}
               ref={resultRef}
               tabIndex={-1}
-              className={`flex items-center gap-2 rounded-full text-[15px] font-medium outline-none ${status === "denied" ? "text-fg-muted" : "text-success"}`}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={spring}
+              className={`flex items-center gap-2 rounded-full motion-reduce:transform-none! text-[15px] font-medium outline-none ${status === "denied" ? "text-fg-muted" : "text-success"}`}
+              initial={from}
+              animate={to}
+              exit={out}
+              transition={move}
             >
               <motion.span
-                className={`grid size-7 place-items-center rounded-full ${status === "denied" ? "bg-muted" : "bg-success-soft"}`}
-                initial={{ scale: 0.4, rotate: -30 }}
+                className={`grid size-7 place-items-center rounded-full motion-reduce:transform-none! ${status === "denied" ? "bg-muted" : "bg-success-soft"}`}
+                initial={reduce ? false : { scale: 0.4, rotate: -30 }}
                 animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 520, damping: 18 }}
+                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 520, damping: 18 }}
               >
                 {status === "denied" ? <X size={16} strokeWidth={2} /> : <Check size={16} strokeWidth={2} />}
               </motion.span>
